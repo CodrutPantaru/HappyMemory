@@ -16,7 +16,7 @@ import { Card } from './models';
       >
       <div class="card-inner">
         <div class="card-face card-front">
-          <img class="card-image back" src="assets/cards/animals/back-card.png" alt="Back card" />
+          <img class="card-image back" [src]="backImageUrl" alt="Back card" />
         </div>
         <div class="card-face card-back">
           @if (card.imageUrl) {
@@ -32,6 +32,7 @@ import { Card } from './models';
 })
 export class CardComponent {
   @Input({ required: true }) card!: Card;
+  @Input({ required: true }) backImageUrl!: string;
   @Input() disabled = false;
   @Output() reveal = new EventEmitter<Card>();
 

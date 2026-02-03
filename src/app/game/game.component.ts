@@ -56,11 +56,11 @@ export class GameComponent implements OnInit {
     letters: Array.from('ABCDEFGH').map((letter) => ({
       value: letter,
       display: letter,
-      imageUrl: `assets/cards/letters/${letter}.svg`
+      imageUrl: `assets/cards/letters/${letter}.png`
     })),
-    numbers: Array.from({ length: 8 }, (_, index) => {
-      const value = String(index + 1);
-      return { value, display: value, imageUrl: `assets/cards/numbers/${value}.svg` };
+    numbers: Array.from({ length: 10 }, (_, index) => {
+      const value = String(index);
+      return { value, display: value, imageUrl: `assets/cards/numbers/${value}.png` };
     })
   };
 
@@ -152,6 +152,17 @@ export class GameComponent implements OnInit {
 
   get gridTemplate(): string {
     return `repeat(${this.currentOption.cols}, minmax(0, 1fr))`;
+  }
+
+  get backCardUrl(): string {
+    switch (this.selectedCategory) {
+      case 'numbers':
+        return 'assets/cards/numbers/back-card.png';
+      case 'letters':
+        return 'assets/cards/letters/back-card.png';
+      default:
+        return 'assets/cards/animals/back-card.png';
+    }
   }
 
   get selectedCategoryLabel(): string {

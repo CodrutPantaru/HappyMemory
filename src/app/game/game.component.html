@@ -101,6 +101,7 @@
           @for (card of cards; track trackCard($index, card)) {
             <app-card
               [card]="card"
+              [backImageUrl]="backCardUrl"
               [disabled]="lockBoard"
               (reveal)="reveal($event)"
             ></app-card>
