@@ -1,10 +1,9 @@
 ﻿import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, Router } from '@angular/router';
 import { CategoryId, MatchSize, GridOption, buildGridOptions, defaultGridIdForSize } from '../game/models';
 import { I18nService, LanguageCode } from '../i18n/i18n.service';
 import { AudioService } from '../audio/audio.service';
-import { GoogleAuthService, UserProfile } from '../auth/google-auth.service';
 
 interface StoredSettings {
   category: CategoryId;
@@ -17,11 +16,10 @@ interface StoredSettings {
 const SETTINGS_KEY = 'memory-game-settings-v1';
 
 @Component({
-  selector: 'app-menu',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  templateUrl: './menu.component.html',
-  styleUrl: './menu.component.scss'
+    selector: 'app-menu',
+    imports: [RouterModule],
+    templateUrl: './menu.component.html',
+    styleUrl: './menu.component.scss'
 })
 export class MenuComponent implements OnInit {
   readonly categories: Array<{ id: CategoryId; labelKey: string; emoji: string }> = [
@@ -43,15 +41,16 @@ export class MenuComponent implements OnInit {
   selectedCategory: CategoryId = 'animals';
   selectedMatchSize: MatchSize = 2;
   selectedGridId = defaultGridIdForSize(2);
+  gridOptions: GridOption[] = buildGridOptions(2);
   soundOn = true;
   musicOn = true;
   isSettingsOpen = false;
-  user: UserProfile | null = null;
+  openLanguage = false;
+  isLanguageClosing = false;
 
   constructor(
     public readonly i18n: I18nService,
     private readonly audio: AudioService,
-    private readonly auth: GoogleAuthService,
     private readonly router: Router
   ) {}
 
@@ -66,6 +65,7 @@ export class MenuComponent implements OnInit {
       this.audio.updateSettings(this.soundOn, this.musicOn);
     }
 
+    this.gridOptions = buildGridOptions(this.selectedMatchSize);
     if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
       this.selectedGridId = defaultGridIdForSize(this.selectedMatchSize);
       if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
@@ -73,9 +73,6 @@ export class MenuComponent implements OnInit {
       }
     }
 
-    this.auth.user$.subscribe((user) => {
-      this.user = user;
-    });
   }
 
   get lastSettingsLabel(): string {
@@ -86,10 +83,6 @@ export class MenuComponent implements OnInit {
     return `${categoryLabel} • ${matchLabel} • ${gridLabel}`.trim();
   }
 
-  get gridOptions(): GridOption[] {
-    return buildGridOptions(this.selectedMatchSize);
-  }
-
   get currentGrid(): GridOption {
     return this.gridOptions.find((option) => option.id === this.selectedGridId) ?? this.gridOptions[0];
   }
@@ -98,9 +91,22 @@ export class MenuComponent implements OnInit {
     this.i18n.setLanguage(code);
   }
 
-  signIn(): void {
+  openLanguageModal(): void {
     this.audio.playButton();
-    this.auth.signIn();
+    this.isLanguageClosing = false;
+    this.openLanguage = true;
+  }
+
+  closeLanguageModal(): void {
+    if (!this.openLanguage || this.isLanguageClosing) {
+      return;
+    }
+    this.audio.playButton();
+    this.isLanguageClosing = true;
+    setTimeout(() => {
+      this.openLanguage = false;
+      this.isLanguageClosing = false;
+    }, 160);
   }
 
   startGame(): void {
@@ -136,6 +142,7 @@ export class MenuComponent implements OnInit {
   setMatchSize(size: MatchSize): void {
     this.audio.playButton();
     this.selectedMatchSize = size;
+    this.gridOptions = buildGridOptions(size);
     if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
       this.selectedGridId = defaultGridIdForSize(size);
       if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
@@ -214,5 +221,26 @@ export class MenuComponent implements OnInit {
 
   matchSizeLabel(size: MatchSize): string {
     return this.i18n.t('settings.matchCount', { count: size });
+  }
+
+  get currentLanguageFlag(): string {
+    return this.languageFlag(this.i18n.language);
+  }
+
+  languageFlag(code: LanguageCode): string {
+    switch (code) {
+      case 'ro':
+        return '🇷🇴';
+      case 'en':
+        return '🇬🇧';
+      case 'fr':
+        return '🇫🇷';
+      case 'es':
+        return '🇪🇸';
+      case 'de':
+        return '🇩🇪';
+      default:
+        return '🌍';
+    }
   }
 }

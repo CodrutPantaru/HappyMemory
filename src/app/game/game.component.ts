@@ -1,5 +1,5 @@
 ﻿import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { CardComponent } from './card.component';
 import {
@@ -26,11 +26,10 @@ interface ConfettiPiece {
 }
 
 @Component({
-  selector: 'app-game',
-  standalone: true,
-  imports: [CommonModule, RouterModule, CardComponent],
-  templateUrl: './game.component.html',
-  styleUrl: './game.component.scss'
+    selector: 'app-game',
+    imports: [RouterModule, CardComponent],
+    templateUrl: './game.component.html',
+    styleUrl: './game.component.scss'
 })
 export class GameComponent implements OnInit {
   title = 'Memory Game';

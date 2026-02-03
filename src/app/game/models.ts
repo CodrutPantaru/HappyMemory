@@ -35,7 +35,7 @@ export const buildGridOptions = (size: MatchSize): GridOption[] => {
       const rows = size * rowMultiplier;
       const cols = size * colMultiplier;
       const id = `${rows}x${cols}`;
-      options.push({ id, rows, cols, label: `${rows}×${cols}` });
+      options.push({ id, rows, cols, label: `${rows}x${cols}` });
     }
   }
   return options;
@@ -56,3 +56,4 @@ export interface Card {
   imageUrl?: string;
   state: CardState;
 }
+

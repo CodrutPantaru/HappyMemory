@@ -1,22 +1,12 @@
 ﻿<div class="menu-shell">
   <header class="top-header">
     <div class="profile">
-      <button class="avatar-button" type="button" (click)="signIn()" [attr.aria-label]="i18n.t('home.signIn')">
-        <ng-container *ngIf="user?.imageUrl; else avatarFallback">
-          <img class="avatar-image" [src]="user?.imageUrl" [alt]="user?.name || i18n.t('home.player')" />
-        </ng-container>
-        <ng-template #avatarFallback>
-          <span class="avatar-emoji">🙂</span>
-        </ng-template>
-      </button>
+      <div class="avatar-button" aria-hidden="true">
+        <span class="avatar-emoji">🙂</span>
+      </div>
       <div class="welcome">
         <div class="hello">{{ i18n.t('home.hello') }}</div>
-        <div class="subtitle" *ngIf="user?.name; else guestWelcome">
-          {{ i18n.t('home.welcomeUser', { name: user?.name || i18n.t('home.player') }) }}
-        </div>
-        <ng-template #guestWelcome>
-          <div class="subtitle">{{ i18n.t('home.welcome') }}</div>
-        </ng-template>
+        <div class="subtitle">{{ i18n.t('home.welcome') }}</div>
       </div>
     </div>
     <div class="header-actions">
@@ -26,7 +16,7 @@
         [class.is-off]="!soundOn"
         [attr.aria-pressed]="soundOn"
         (click)="toggleSound()"
-      >
+        >
         <span class="icon">🔊</span>
       </button>
       <button
@@ -35,26 +25,18 @@
         [class.is-off]="!musicOn"
         [attr.aria-pressed]="musicOn"
         (click)="toggleMusic()"
-      >
+        >
         <span class="icon">🎵</span>
       </button>
-      <select
-        class="language-select"
-        [value]="i18n.language"
-        (change)="setLanguage($any($event.target).value)"
-        aria-label="Limba"
-      >
-        <option *ngFor="let lang of languages" [value]="lang.id">{{ lang.label }}</option>
-      </select>
     </div>
   </header>
-    <img class="logo-float" src="assets/logo.png" alt="{{ i18n.t('app.title') }}" />
+  <img class="logo-float" src="assets/logo.png" alt="{{ i18n.t('app.title') }}" />
 
   <div class="home-content">
     <section class="action-card">
-    <button class="primary jumbo full" type="button" (click)="startGame()" aria-label="Start joc">
-      {{ i18n.t('home.start') }}
-    </button>
+      <button class="primary jumbo full" type="button" (click)="startGame()" aria-label="Start joc">
+        {{ i18n.t('home.start') }}
+      </button>
       <div class="last-settings">
         <span class="last-label">{{ i18n.t('home.lastSettings') }}</span>
         <span class="last-value">{{ lastSettingsLabel }}</span>
@@ -64,70 +46,107 @@
         <span class="icon">⚙️</span>
         {{ i18n.t('home.settings') }}
       </button>
-  </section>
-</div>
+      <button
+        class="language-flag"
+        type="button"
+        (click)="openLanguageModal()"
+        [attr.aria-label]="i18n.t('home.language')"
+      >
+        {{ currentLanguageFlag }}
+      </button>
+    </section>
+  </div>
 </div>
 
-<div class="sheet-backdrop" *ngIf="isSettingsOpen" (click)="closeSettings()" aria-label="Inchide setari"></div>
-<div class="bottom-sheet" *ngIf="isSettingsOpen" role="dialog" aria-modal="true">
-  <div class="sheet-handle"></div>
-  <div class="sheet-header">
-    <div class="sheet-title">{{ i18n.t('settings.title') }}</div>
-    <button class="sheet-close" type="button" (click)="closeSettings()" aria-label="Inchide setari">
-      {{ i18n.t('settings.close') }}
+@if (isSettingsOpen) {
+  <div class="sheet-backdrop" (click)="closeSettings()" aria-label="Inchide setari"></div>
+}
+@if (isSettingsOpen) {
+  <div class="bottom-sheet" role="dialog" aria-modal="true">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">{{ i18n.t('settings.title') }}</div>
+      <button class="sheet-close" type="button" (click)="closeSettings()" aria-label="Inchide setari">
+        {{ i18n.t('settings.close') }}
+      </button>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-label">{{ i18n.t('settings.category') }}</div>
+      <div class="choice-row">
+        @for (category of categories; track category) {
+          <button
+            class="chip"
+            [class.active]="selectedCategory === category.id"
+            (click)="setCategory(category.id)"
+            [attr.aria-pressed]="selectedCategory === category.id"
+            [attr.aria-label]="i18n.t(category.labelKey)"
+            >
+            <span class="chip-emoji">{{ category.emoji }}</span>
+            <span>{{ i18n.t(category.labelKey) }}</span>
+          </button>
+        }
+      </div>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-label">{{ i18n.t('settings.matchSize') }}</div>
+      <div class="choice-row">
+        @for (size of matchSizes; track size) {
+          <button
+            class="chip"
+            [class.active]="selectedMatchSize === size"
+            (click)="setMatchSize(size)"
+            [attr.aria-pressed]="selectedMatchSize === size"
+            [attr.aria-label]="matchSizeLabel(size)"
+            >
+            {{ matchSizeLabel(size) }}
+          </button>
+        }
+      </div>
+    </div>
+    <div class="sheet-section">
+      <div class="sheet-label">{{ i18n.t('settings.grid') }}</div>
+      <div class="choice-row">
+        @for (option of gridOptions; track option) {
+          <button
+            class="chip"
+            [class.active]="selectedGridId === option.id"
+            (click)="setGrid(option.id)"
+            [attr.aria-pressed]="selectedGridId === option.id"
+            [attr.aria-label]="option.label"
+            >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+    </div>
+    <button class="primary sheet-start" type="button" (click)="saveSettings()" aria-label="Salveaza setari">
+      {{ i18n.t('settings.save') }}
     </button>
   </div>
+}
 
-  <div class="sheet-section">
-    <div class="sheet-label">{{ i18n.t('settings.category') }}</div>
-    <div class="choice-row">
-      <button
-        class="chip"
-        *ngFor="let category of categories"
-        [class.active]="selectedCategory === category.id"
-        (click)="setCategory(category.id)"
-        [attr.aria-pressed]="selectedCategory === category.id"
-        [attr.aria-label]="i18n.t(category.labelKey)"
-      >
-        <span class="chip-emoji">{{ category.emoji }}</span>
-        <span>{{ i18n.t(category.labelKey) }}</span>
+@if (openLanguage) {
+  <div class="sheet-backdrop" (click)="closeLanguageModal()" aria-label="Inchide limba"></div>
+  <div class="language-popover" [class.closing]="isLanguageClosing" role="dialog" aria-modal="true">
+    <div class="sheet-header">
+      <div class="sheet-title">{{ i18n.t('home.language') }}</div>
+      <button class="sheet-close" type="button" (click)="closeLanguageModal()" aria-label="Inchide">
+        {{ i18n.t('settings.close') }}
       </button>
     </div>
-  </div>
-
-  <div class="sheet-section">
-    <div class="sheet-label">{{ i18n.t('settings.matchSize') }}</div>
-    <div class="choice-row">
-      <button
-        class="chip"
-        *ngFor="let size of matchSizes"
-        [class.active]="selectedMatchSize === size"
-        (click)="setMatchSize(size)"
-        [attr.aria-pressed]="selectedMatchSize === size"
-        [attr.aria-label]="matchSizeLabel(size)"
-      >
-        {{ matchSizeLabel(size) }}
-      </button>
+    <div class="language-grid">
+      @for (lang of languages; track lang) {
+        <button
+          class="chip"
+          [class.active]="i18n.language === lang.id"
+          (click)="setLanguage(lang.id); closeLanguageModal()"
+          [attr.aria-pressed]="i18n.language === lang.id"
+          [attr.aria-label]="lang.label"
+        >
+          <span class="flag">{{ languageFlag(lang.id) }}</span>
+          <span>{{ lang.label }}</span>
+        </button>
+      }
     </div>
   </div>
-
-  <div class="sheet-section">
-    <div class="sheet-label">{{ i18n.t('settings.grid') }}</div>
-    <div class="choice-row">
-      <button
-        class="chip"
-        *ngFor="let option of gridOptions"
-        [class.active]="selectedGridId === option.id"
-        (click)="setGrid(option.id)"
-        [attr.aria-pressed]="selectedGridId === option.id"
-        [attr.aria-label]="option.label"
-      >
-        {{ option.label }}
-      </button>
-    </div>
-  </div>
-
-  <button class="primary sheet-start" type="button" (click)="saveSettings()" aria-label="Salveaza setari">
-    {{ i18n.t('settings.save') }}
-  </button>
-</div>
+}

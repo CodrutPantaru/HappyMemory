@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { AdMob, BannerAdPosition, BannerAdSize, MaxAdContentRating } from '@capacitor-community/admob';
 
-const BANNER_AD_ID = 'ca-app-pub-3940256099942544/6300978111';
+const BANNER_AD_ID = 'ca-app-pub-2750823075008793/3635713707';
 
 @Injectable({ providedIn: 'root' })
 export class AdMobService {

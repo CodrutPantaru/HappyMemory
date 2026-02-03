@@ -1,26 +1,15 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.memorygame.app',
+  appId: 'com.pantarucodrut.happymemorymatch',
   appName: 'Happy Memory Match',
   webDir: 'dist/memory-game/browser',
   plugins: {
     AdMob: {
-      appId: 'ca-app-pub-3940256099942544~3347511713'
-    },
-    SocialLogin: {
-      providers: {
-        google: true,
-        facebook: false,
-        apple: false,
-        twitter: false
-      },
-      google: {
-        webClientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
-        mode: 'online'
-      }
+      appId: 'ca-app-pub-2750823075008793~7506783752'
     }
   }
 };
 
 export default config;
+

@@ -2,7 +2,8 @@
 <resources>
     <string name="app_name">Happy Memory Match</string>
     <string name="title_activity_main">Happy Memory Match</string>
-    <string name="package_name">com.memorygame.app</string>
-    <string name="custom_url_scheme">com.memorygame.app</string>
-    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="package_name">com.pantarucodrut.happymemorymatch</string>
+    <string name="custom_url_scheme">com.pantarucodrut.happymemorymatch</string>
+    <string name="admob_app_id">ca-app-pub-2750823075008793~7506783752</string>
 </resources>
+

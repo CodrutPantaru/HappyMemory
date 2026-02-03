@@ -1,12 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Card } from './models';
 
 @Component({
-  selector: 'app-card',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-card',
+    imports: [],
+    template: `
     <button
       class="card"
       [class.revealed]="card.state !== 'hidden'"
@@ -14,21 +13,22 @@ import { Card } from './models';
       [disabled]="disabled || card.state === 'matched'"
       (click)="handleClick()"
       aria-label="card"
-    >
+      >
       <div class="card-inner">
         <div class="card-face card-front">
           <img class="card-image back" src="assets/cards/animals/back-card.png" alt="Back card" />
         </div>
         <div class="card-face card-back">
-          <ng-container *ngIf="card.imageUrl; else textContent">
+          @if (card.imageUrl) {
             <img class="card-image" [src]="card.imageUrl" [alt]="card.display" />
-          </ng-container>
-          <ng-template #textContent>{{ card.display }}</ng-template>
+          } @else {
+            {{ card.display }}
+          }
         </div>
       </div>
     </button>
-  `,
-  styleUrl: './card.component.scss'
+    `,
+    styleUrl: './card.component.scss'
 })
 export class CardComponent {
   @Input({ required: true }) card!: Card;
