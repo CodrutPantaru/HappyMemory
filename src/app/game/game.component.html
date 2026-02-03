@@ -1,0 +1,125 @@
+﻿<div class="game-shell">
+  <header class="top-bar">
+    <a
+      class="nav-icon"
+      routerLink="/"
+      [attr.aria-label]="i18n.t('game.back')"
+      (click)="onBack()"
+    >
+      ←
+    </a>
+    <div class="nav-title">{{ selectedCategoryLabel || i18n.t('game.chooseCategory') }}</div>
+    <div class="nav-actions">
+      <button
+        class="nav-icon"
+        type="button"
+        [class.is-off]="!soundOn"
+        [attr.aria-pressed]="soundOn"
+        [attr.aria-label]="i18n.t('settings.sound')"
+        (click)="toggleSound()"
+      >
+        🔊
+      </button>
+      <button
+        class="nav-icon"
+        type="button"
+        [class.is-off]="!musicOn"
+        [attr.aria-pressed]="musicOn"
+        [attr.aria-label]="i18n.t('settings.music')"
+        (click)="toggleMusic()"
+      >
+        🎵
+      </button>
+    </div>
+  </header>
+
+  <div class="progress-wrap" *ngIf="stage === 'play'">
+    <div class="progress-track">
+      <div class="progress-fill" [style.width.%]="progressPercent"></div>
+    </div>
+    <div class="progress-label">{{ i18n.t('game.progress') }}: {{ progressPercent }}%</div>
+  </div>
+
+  <section class="select" *ngIf="stage === 'select'">
+    <div class="select-card">
+      <div class="select-title">{{ i18n.t('game.chooseCategory') }}</div>
+      <div class="choice-grid">
+        <button
+          class="choice-card"
+          *ngFor="let category of categories"
+          (click)="selectCategory(category.id)"
+        >
+          <div class="choice-emoji">{{ category.emoji }}</div>
+          <div class="choice-text">{{ i18n.t(category.labelKey) }}</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="select-card">
+      <div class="select-title">{{ i18n.t('settings.matchSize') }}</div>
+      <div class="choice-grid">
+        <button
+          class="choice-card small"
+          *ngFor="let size of matchSizes"
+          [class.active]="selectedMatchSize === size"
+          (click)="setMatchSize(size)"
+        >
+          <div class="choice-text">{{ i18n.t('settings.matchCount', { count: size }) }}</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="select-card">
+      <div class="select-title">{{ i18n.t('settings.grid') }}</div>
+      <div class="choice-grid">
+        <button
+          class="choice-card small"
+          *ngFor="let option of gridOptions"
+          [class.active]="selectedGridId === option.id"
+          (click)="setGrid(option.id)"
+        >
+          <div class="choice-text">{{ option.label }}</div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="game" *ngIf="stage === 'play'">
+    <div class="board-wrapper">
+      <div
+        class="board"
+        [style.gridTemplateColumns]="gridTemplate"
+        [style.--cols]="currentOption.cols"
+        [style.--rows]="currentOption.rows"
+      >
+        <app-card
+          *ngFor="let card of cards; trackBy: trackCard"
+          [card]="card"
+          [disabled]="lockBoard"
+          (reveal)="reveal($event)"
+        ></app-card>
+      </div>
+    </div>
+  </section>
+
+  <div class="win-overlay" *ngIf="isWin">
+    <div class="confetti-layer">
+      <span
+        class="confetti"
+        *ngFor="let piece of confettiPieces"
+        [style.left.%]="piece.left"
+        [style.width.px]="piece.size"
+        [style.height.px]="piece.size * 1.6"
+        [style.background]="'hsl(' + piece.hue + ', 85%, 60%)'"
+        [style.animation-delay.s]="piece.delay"
+        [style.animation-duration.s]="piece.duration"
+        [style.transform]="'rotate(' + piece.rotate + 'deg)'"
+      ></span>
+    </div>
+    <div class="win-card">
+      <div class="win-title">{{ i18n.t('game.winTitle') }} 🎉</div>
+      <p>{{ i18n.t('game.winText', { moves }) }}</p>
+      <button class="primary" (click)="playAgain()">{{ i18n.t('game.playAgain') }}</button>
+    </div>
+  </div>
+</div>

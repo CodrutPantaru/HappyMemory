@@ -1,0 +1,29 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Fredoka', 'Nunito', system-ui, sans-serif;
+  min-height: 100vh;
+  background-color: #bfe6ff;
+  background-image: url('assets/backgrounds/field.png');
+  background-size: cover;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 45%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+button {
+  font-family: inherit;
+}
