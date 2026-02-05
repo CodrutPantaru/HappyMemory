@@ -1,0 +1,226 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  --ad-safe-height: 72px;
+}
+
+.configure-shell {
+  min-height: 100vh;
+  padding: calc(env(safe-area-inset-top) + 0.75rem) clamp(1.1rem, 4vw, 2rem)
+    calc(10rem + var(--ad-safe-height) + env(safe-area-inset-bottom));
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.top-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #5dd05b 0%, #8eea63 50%, #4acb7b 100%);
+  box-shadow: 0 18px 36px rgba(18, 12, 8, 0.18);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.nav-icon {
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.nav-title {
+  text-align: center;
+  font-weight: 800;
+  color: #0f3a1b;
+}
+
+.config-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1.25rem;
+  padding: 1rem;
+  box-shadow: 0 14px 28px rgba(18, 12, 8, 0.15);
+  display: grid;
+  gap: 0.8rem;
+}
+
+.section-title {
+  font-weight: 800;
+  color: #2f3b2b;
+}
+
+.pack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(82px, 92px));
+  gap: 0.55rem;
+  justify-content: start;
+}
+
+.pack-grid.two-rows {
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.pack-card {
+  border: 2px solid transparent;
+  border-radius: 0.9rem;
+  background: #ffffff;
+  cursor: pointer;
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 0.42rem 0.3rem;
+  box-shadow: 0 10px 20px rgba(18, 12, 8, 0.12);
+  width: 92px;
+  justify-self: center;
+}
+
+.pack-card-image {
+  width: 35px;
+  height: 35px;
+  border-radius: 0.45rem;
+  object-fit: cover;
+}
+
+.pack-card-name {
+  color: #2f3b2b;
+  font-weight: 800;
+  text-align: center;
+  font-size: 0.88rem;
+}
+
+.pack-card-lock {
+  font-size: 0.78rem;
+  color: #8d5e00;
+  font-weight: 800;
+}
+
+.pack-card.active {
+  border-color: #4caf50;
+  background: #f2ffe0;
+}
+
+.pack-card.locked {
+  border-color: rgba(232, 178, 36, 0.5);
+  background: #fff7df;
+}
+
+.pack-card:disabled {
+  opacity: 0.7;
+}
+
+.sticky-save {
+  position: sticky;
+  bottom: calc(var(--ad-safe-height) + env(safe-area-inset-bottom));
+  z-index: 6;
+  padding: 0.75rem 0 0.4rem;
+  background: #f6f2ec;
+  border-top: 1px solid rgba(31, 27, 22, 0.08);
+  box-shadow: 0 -10px 22px rgba(18, 12, 8, 0.12);
+}
+
+.save-button {
+  width: 100%;
+  min-height: 3.4rem;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #64d156 0%, #32b96e 100%);
+  color: #f8fff2;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 10, 8, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 20;
+}
+
+.paywall {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(460px, 90vw);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 1.5rem;
+  padding: 1rem 1rem 1.2rem;
+  box-shadow: 0 24px 40px rgba(18, 12, 8, 0.2);
+  z-index: 40;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sheet-title {
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.sheet-close {
+  border: none;
+  background: rgba(76, 175, 80, 0.12);
+  color: #2f3b2b;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+
+.paywall-text {
+  margin: 0;
+  color: #2f3b2b;
+}
+
+.paywall-focus {
+  font-weight: 800;
+  color: #1f1b16;
+  background: #f3ffde;
+  border: 2px solid #d5eeb1;
+  border-radius: 0.9rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.paywall-products {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.paywall-buy {
+  width: 100%;
+  min-height: 3rem;
+  border-radius: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(245, 245, 245, 0.9));
+  color: #2f3b2b;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.restore-link {
+  border: none;
+  background: transparent;
+  color: #29663c;
+  text-decoration: underline;
+  justify-self: center;
+  font-weight: 700;
+  cursor: pointer;
+}

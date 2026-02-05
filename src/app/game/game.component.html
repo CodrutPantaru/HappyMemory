@@ -50,10 +50,15 @@
           @for (category of categories; track category) {
             <button
               class="choice-card"
+              [class.locked]="!isCategoryUnlocked(category.id)"
+              [disabled]="!isCategoryUnlocked(category.id)"
               (click)="selectCategory(category.id)"
               >
               <div class="choice-emoji">{{ category.emoji }}</div>
               <div class="choice-text">{{ i18n.t(category.labelKey) }}</div>
+              @if (!isCategoryUnlocked(category.id)) {
+                <div class="choice-lock">🔒 {{ categoryPrice(category.id) }}</div>
+              }
             </button>
           }
         </div>

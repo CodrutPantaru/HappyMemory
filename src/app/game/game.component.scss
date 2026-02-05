@@ -206,6 +206,12 @@ button.ghost:active,
   color: #2f3b2b;
 }
 
+.choice-lock {
+  font-size: 0.76rem;
+  color: #8d5e00;
+  font-weight: 800;
+}
+
 .choice-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 30px rgba(18, 12, 8, 0.16);
@@ -215,6 +221,16 @@ button.ghost:active,
   border-color: #4caf50;
   background: #f2ffe0;
   box-shadow: 0 16px 30px rgba(72, 154, 95, 0.25);
+}
+
+.choice-card.locked {
+  border-color: rgba(232, 178, 36, 0.5);
+  background: #fff7df;
+}
+
+.choice-card:disabled {
+  cursor: not-allowed;
+  opacity: 0.9;
 }
 
 .progress-wrap {

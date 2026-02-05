@@ -1,12 +1,13 @@
 ﻿import { Component, OnInit } from '@angular/core';
-
-import { RouterModule, Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AudioService } from '../audio/audio.service';
 import { CategoryId, MatchSize, GridOption, buildGridOptions, defaultGridIdForSize } from '../game/models';
 import { I18nService, LanguageCode } from '../i18n/i18n.service';
-import { AudioService } from '../audio/audio.service';
+import { PurchaseService } from '../monetization/purchase.service';
 
 interface StoredSettings {
   category: CategoryId;
+  categories?: CategoryId[];
   matchSize: MatchSize;
   gridId: string;
   soundOn: boolean;
@@ -16,17 +17,18 @@ interface StoredSettings {
 const SETTINGS_KEY = 'memory-game-settings-v1';
 
 @Component({
-    selector: 'app-menu',
-    standalone: true,
-    imports: [RouterModule],
-    templateUrl: './menu.component.html',
-    styleUrl: './menu.component.scss'
+  selector: 'app-menu',
+  standalone: true,
+  imports: [RouterModule],
+  templateUrl: './menu.component.html',
+  styleUrl: './menu.component.scss'
 })
 export class MenuComponent implements OnInit {
-  readonly categories: Array<{ id: CategoryId; labelKey: string; emoji: string }> = [
-    { id: 'animals', labelKey: 'category.animals', emoji: '🐾' },
-    { id: 'letters', labelKey: 'category.letters', emoji: '🔤' },
-    { id: 'numbers', labelKey: 'category.numbers', emoji: '🔢' }
+  readonly categories: Array<{ id: CategoryId; labelKey: string; imageUrl: string }> = [
+    { id: 'animals', labelKey: 'category.animals', imageUrl: 'assets/cards/animals/cat.webp' },
+    { id: 'letters', labelKey: 'category.letters', imageUrl: 'assets/cards/letters/A.webp' },
+    { id: 'numbers', labelKey: 'category.numbers', imageUrl: 'assets/cards/numbers/1.webp' },
+    { id: 'hospital', labelKey: 'category.hospital', imageUrl: 'assets/cards/hospital-sprites/hospital-thumb.png' }
   ];
 
   readonly matchSizes: MatchSize[] = [2, 3, 4];
@@ -39,26 +41,30 @@ export class MenuComponent implements OnInit {
     { id: 'de', label: 'Deutsch' }
   ];
 
-  selectedCategory: CategoryId = 'animals';
+  selectedCategories: CategoryId[] = ['animals'];
   selectedMatchSize: MatchSize = 2;
   selectedGridId = defaultGridIdForSize(2);
-  gridOptions: GridOption[] = buildGridOptions(2);
   soundOn = true;
   musicOn = true;
-  isSettingsOpen = false;
   openLanguage = false;
   isLanguageClosing = false;
+  isDifficultyOpen = false;
 
   constructor(
     public readonly i18n: I18nService,
     private readonly audio: AudioService,
+    private readonly purchases: PurchaseService,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
+    void this.purchases.init();
+
     const stored = this.readSettings();
     if (stored) {
-      this.selectedCategory = stored.category;
+      this.selectedCategories =
+        stored.categories?.filter((category) => this.isKnownCategory(category)) ??
+        [stored.category ?? 'animals'];
       this.selectedMatchSize = stored.matchSize;
       this.selectedGridId = stored.gridId;
       this.soundOn = stored.soundOn;
@@ -66,26 +72,35 @@ export class MenuComponent implements OnInit {
       this.audio.updateSettings(this.soundOn, this.musicOn);
     }
 
-    this.gridOptions = buildGridOptions(this.selectedMatchSize);
-    if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
+    const unlocked = this.selectedCategories.filter((category) => this.purchases.isCategoryUnlocked(category));
+    this.selectedCategories = unlocked.length ? unlocked : [this.purchases.getFallbackCategory()];
+
+    const validGrids = buildGridOptions(this.selectedMatchSize).map((option) => option.id);
+    if (!validGrids.includes(this.selectedGridId)) {
       this.selectedGridId = defaultGridIdForSize(this.selectedMatchSize);
-      if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
-        this.selectedGridId = this.gridOptions[0]?.id ?? this.selectedGridId;
-      }
     }
 
+    this.persistSettings();
   }
 
-  get lastSettingsLabel(): string {
-    const category = this.categories.find((item) => item.id === this.selectedCategory);
-    const categoryLabel = category ? this.i18n.t(category.labelKey) : '';
-    const matchLabel = this.matchSizeLabel(this.selectedMatchSize);
-    const gridLabel = this.currentGrid.label;
-    return `${categoryLabel} • ${matchLabel} • ${gridLabel}`.trim();
+  get activeCategory() {
+    return this.categories.find((item) => item.id === this.selectedCategories[0]) ?? this.categories[0];
   }
 
-  get currentGrid(): GridOption {
-    return this.gridOptions.find((option) => option.id === this.selectedGridId) ?? this.gridOptions[0];
+  get activePacksLabel(): string {
+    return this.selectedCategories
+      .map((category) => this.categories.find((item) => item.id === category))
+      .filter((item): item is { id: CategoryId; labelKey: string; imageUrl: string } => Boolean(item))
+      .map((item) => this.i18n.t(item.labelKey))
+      .join(', ');
+  }
+
+  get difficultyLabel(): string {
+    return `${this.matchSizeLabel(this.selectedMatchSize)} | ${this.currentGrid.id}`;
+  }
+
+  get gridOptions(): GridOption[] {
+    return buildGridOptions(this.selectedMatchSize);
   }
 
   setLanguage(code: LanguageCode): void {
@@ -113,9 +128,15 @@ export class MenuComponent implements OnInit {
   startGame(): void {
     this.audio.playButton();
     this.audio.startMusicIfEnabled();
+    const safeCategories = this.selectedCategories.filter((category) =>
+      this.purchases.isCategoryUnlocked(category)
+    );
+    const categories = safeCategories.length ? safeCategories : [this.purchases.getFallbackCategory()];
+
     this.router.navigate(['/game'], {
       queryParams: {
-        category: this.selectedCategory,
+        category: categories[0],
+        categories: categories.join(','),
         size: this.selectedMatchSize,
         rows: this.currentGrid.rows,
         cols: this.currentGrid.cols,
@@ -125,36 +146,37 @@ export class MenuComponent implements OnInit {
     });
   }
 
-  openSettings(): void {
+  goToPackConfig(): void {
     this.audio.playButton();
-    this.isSettingsOpen = true;
+    this.router.navigate(['/configure-pack']);
   }
 
-  closeSettings(): void {
+  openDifficultyModal(): void {
     this.audio.playButton();
-    this.isSettingsOpen = false;
+    this.isDifficultyOpen = true;
   }
 
-  setCategory(category: CategoryId): void {
+  closeDifficultyModal(): void {
     this.audio.playButton();
-    this.selectedCategory = category;
+    this.isDifficultyOpen = false;
   }
 
   setMatchSize(size: MatchSize): void {
     this.audio.playButton();
     this.selectedMatchSize = size;
-    this.gridOptions = buildGridOptions(size);
-    if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
-      this.selectedGridId = defaultGridIdForSize(size);
-      if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
-        this.selectedGridId = this.gridOptions[0]?.id ?? this.selectedGridId;
-      }
-    }
+    this.selectedGridId = defaultGridIdForSize(size);
+    this.persistSettings();
   }
 
   setGrid(id: string): void {
     this.audio.playButton();
     this.selectedGridId = id;
+    this.persistSettings();
+  }
+
+  saveDifficulty(): void {
+    this.persistSettings();
+    this.closeDifficultyModal();
   }
 
   toggleSound(): void {
@@ -174,54 +196,13 @@ export class MenuComponent implements OnInit {
     }
   }
 
-  saveSettings(): void {
-    this.persistSettings();
-    this.closeSettings();
-    this.audio.updateSettings(this.soundOn, this.musicOn);
-  }
-
-  private persistSettings(): void {
-    const settings: StoredSettings = {
-      category: this.selectedCategory,
-      matchSize: this.selectedMatchSize,
-      gridId: this.selectedGridId,
-      soundOn: this.soundOn,
-      musicOn: this.musicOn
-    };
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  }
-
-  private readSettings(): StoredSettings | null {
-    try {
-      const raw = localStorage.getItem(SETTINGS_KEY);
-      if (!raw) {
-        return null;
-      }
-      const parsed = JSON.parse(raw) as Partial<StoredSettings> & { difficulty?: string };
-      const category = parsed.category ?? 'animals';
-      const soundOn = parsed.soundOn;
-      const musicOn = typeof parsed.musicOn === 'boolean' ? parsed.musicOn : true;
-      const matchSize = parsed.matchSize ?? 2;
-      const gridId = parsed.gridId ?? parsed.difficulty ?? defaultGridIdForSize(matchSize as MatchSize);
-
-      if (!category || typeof soundOn !== 'boolean') {
-        return null;
-      }
-
-      return {
-        category,
-        matchSize: (matchSize === 2 || matchSize === 3 || matchSize === 4 ? matchSize : 2) as MatchSize,
-        gridId,
-        soundOn,
-        musicOn
-      };
-    } catch {
-      return null;
-    }
-  }
-
   matchSizeLabel(size: MatchSize): string {
     return this.i18n.t('settings.matchCount', { count: size });
+  }
+
+  private get currentGrid(): GridOption {
+    const grids = buildGridOptions(this.selectedMatchSize);
+    return grids.find((item) => item.id === this.selectedGridId) ?? grids[0];
   }
 
   get currentLanguageFlag(): string {
@@ -243,5 +224,52 @@ export class MenuComponent implements OnInit {
       default:
         return '🌍';
     }
+  }
+
+  private persistSettings(): void {
+    const settings: StoredSettings = {
+      category: this.selectedCategories[0] ?? this.purchases.getFallbackCategory(),
+      categories: this.selectedCategories,
+      matchSize: this.selectedMatchSize,
+      gridId: this.selectedGridId,
+      soundOn: this.soundOn,
+      musicOn: this.musicOn
+    };
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }
+
+  private readSettings(): StoredSettings | null {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if (!raw) {
+        return null;
+      }
+      const parsed = JSON.parse(raw) as Partial<StoredSettings> & { difficulty?: string };
+      const category = parsed.category ?? 'animals';
+      const categories = parsed.categories?.filter((item): item is CategoryId => this.isKnownCategory(item));
+      const soundOn = parsed.soundOn;
+      const musicOn = typeof parsed.musicOn === 'boolean' ? parsed.musicOn : true;
+      const matchSize = parsed.matchSize ?? 2;
+      const gridId = parsed.gridId ?? parsed.difficulty ?? defaultGridIdForSize(matchSize as MatchSize);
+
+      if (!category || typeof soundOn !== 'boolean') {
+        return null;
+      }
+
+      return {
+        category,
+        categories,
+        matchSize: (matchSize === 2 || matchSize === 3 || matchSize === 4 ? matchSize : 2) as MatchSize,
+        gridId,
+        soundOn,
+        musicOn
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  private isKnownCategory(value: unknown): value is CategoryId {
+    return value === 'animals' || value === 'letters' || value === 'numbers' || value === 'hospital';
   }
 }

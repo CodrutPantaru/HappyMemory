@@ -48,6 +48,12 @@
   background: #ffffff;
 }
 
+.card-sprite {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+}
+
 .card-front {
   background: #fff7e0;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);

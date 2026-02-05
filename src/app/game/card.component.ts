@@ -20,7 +20,14 @@ import { Card } from './models';
           <img class="card-image back" [src]="backImageUrl" alt="Back card" />
         </div>
         <div class="card-face card-back">
-          @if (card.imageUrl) {
+          @if (hasSprite) {
+            <div
+              class="card-sprite"
+              [style.backgroundImage]="'url(' + card.imageUrl + ')'"
+              [style.backgroundPosition]="spritePosition"
+              [style.backgroundSize]="spriteSize"
+            ></div>
+          } @else if (card.imageUrl) {
             <img class="card-image" [src]="card.imageUrl" [alt]="card.display" />
           } @else {
             {{ card.display }}
@@ -41,5 +48,45 @@ export class CardComponent {
     if (this.card) {
       this.reveal.emit(this.card);
     }
+  }
+
+  get hasSprite(): boolean {
+    return (
+      typeof this.card.spriteIndex === 'number' &&
+      typeof this.card.spriteColumns === 'number' &&
+      typeof this.card.spriteRows === 'number' &&
+      !!this.card.imageUrl
+    );
+  }
+
+  get spritePosition(): string {
+    if (!this.hasSprite) {
+      return '0% 0%';
+    }
+    // const cols = this.card.spriteColumns as number;
+    // const rows = this.card.spriteRows as number;
+    // const index = this.card.spriteIndex as number;
+    // const col = index % cols;
+    // const row = Math.floor(index / cols);
+    // const x = cols > 1 ? (col / (cols - 1)) * 100 : 0;
+    // const y = rows > 1 ? (row / (rows - 1)) * 100 : 0;
+    // return `${x}% ${y}%`;
+    const index = this.card.spriteIndex as number;
+    switch (index) {
+      case 0:
+        return '15% 17%';
+      default:
+      return '51% 17%';
+  }
+}
+
+  get spriteSize(): string {
+    // if (!this.hasSprite) {
+    //   return '100% 100%';
+    // }
+    // const cols = this.card.spriteColumns as number;
+    // const rows = this.card.spriteRows as number;
+    // return `${cols * 100}% ${rows * 100}%`;
+    return '400% 600%';
   }
 }
