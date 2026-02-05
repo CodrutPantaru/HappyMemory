@@ -27,6 +27,7 @@ interface ConfettiPiece {
 
 @Component({
     selector: 'app-game',
+    standalone: true,
     imports: [RouterModule, CardComponent],
     templateUrl: './game.component.html',
     styleUrl: './game.component.scss'
@@ -44,23 +45,23 @@ export class GameComponent implements OnInit {
 
   readonly symbolsByCategory: Record<CategoryId, SymbolItem[]> = {
     animals: [
-      { value: 'cat', display: 'Pisica', imageUrl: 'assets/cards/animals/cat.png' },
-      { value: 'dog', display: 'Catel', imageUrl: 'assets/cards/animals/dog.png' },
-      { value: 'chicken', display: 'Gaina', imageUrl: 'assets/cards/animals/chicken.png' },
-      { value: 'cow', display: 'Vaca', imageUrl: 'assets/cards/animals/cow.png' },
-      { value: 'pig', display: 'Purcel', imageUrl: 'assets/cards/animals/pig.png' },
-      { value: 'elephant', display: 'Elefant', imageUrl: 'assets/cards/animals/elephant.png' },
-      { value: 'monkey', display: 'Maimuta', imageUrl: 'assets/cards/animals/monkey.png' },
-      { value: 'frog', display: 'Broasca', imageUrl: 'assets/cards/animals/frog.png' }
+      { value: 'cat', display: 'Pisica', imageUrl: 'assets/cards/animals/cat.webp' },
+      { value: 'dog', display: 'Catel', imageUrl: 'assets/cards/animals/dog.webp' },
+      { value: 'chicken', display: 'Gaina', imageUrl: 'assets/cards/animals/chicken.webp' },
+      { value: 'cow', display: 'Vaca', imageUrl: 'assets/cards/animals/cow.webp' },
+      { value: 'pig', display: 'Purcel', imageUrl: 'assets/cards/animals/pig.webp' },
+      { value: 'elephant', display: 'Elefant', imageUrl: 'assets/cards/animals/elephant.webp' },
+      { value: 'monkey', display: 'Maimuta', imageUrl: 'assets/cards/animals/monkey.webp' },
+      { value: 'frog', display: 'Broasca', imageUrl: 'assets/cards/animals/frog.webp' }
     ],
     letters: Array.from('ABCDEFGH').map((letter) => ({
       value: letter,
       display: letter,
-      imageUrl: `assets/cards/letters/${letter}.png`
+      imageUrl: `assets/cards/letters/${letter}.webp`
     })),
     numbers: Array.from({ length: 10 }, (_, index) => {
       const value = String(index);
-      return { value, display: value, imageUrl: `assets/cards/numbers/${value}.png` };
+      return { value, display: value, imageUrl: `assets/cards/numbers/${value}.webp` };
     })
   };
 
@@ -157,11 +158,11 @@ export class GameComponent implements OnInit {
   get backCardUrl(): string {
     switch (this.selectedCategory) {
       case 'numbers':
-        return 'assets/cards/numbers/back-card.png';
+        return 'assets/cards/numbers/back-card.webp';
       case 'letters':
-        return 'assets/cards/letters/back-card.png';
+        return 'assets/cards/letters/back-card.webp';
       default:
-        return 'assets/cards/animals/back-card.png';
+        return 'assets/cards/animals/back-card.webp';
     }
   }
 

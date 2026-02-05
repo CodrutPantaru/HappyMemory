@@ -1,9 +1,13 @@
 import { Routes } from '@angular/router';
-import { MenuComponent } from './menu/menu.component';
-import { GameComponent } from './game/game.component';
 
 export const routes: Routes = [
-  { path: '', component: MenuComponent },
-  { path: 'game', component: GameComponent },
+  {
+    path: '',
+    loadComponent: () => import('./menu/menu.component').then((m) => m.MenuComponent)
+  },
+  {
+    path: 'game',
+    loadComponent: () => import('./game/game.component').then((m) => m.GameComponent)
+  },
   { path: '**', redirectTo: '' }
 ];

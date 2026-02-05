@@ -4,6 +4,7 @@ import { Card } from './models';
 
 @Component({
     selector: 'app-card',
+    standalone: true,
     imports: [],
     template: `
     <button

@@ -19,27 +19,27 @@ export class AudioService {
   private musicIndex = 0;
 
   private readonly soundMap: Record<CardSoundKey, string> = {
-    cat: 'assets/sounds/animals/cat.mp3',
-    chicken: 'assets/sounds/animals/chicken.mp3',
-    cow: 'assets/sounds/animals/cow.mp3',
-    dog: 'assets/sounds/animals/dog.mp3',
-    elephant: 'assets/sounds/animals/elephant.mp3',
-    monkey: 'assets/sounds/animals/monkey.mp3',
-    pig: 'assets/sounds/animals/pig.mp3',
-    rabbit: 'assets/sounds/animals/rabbit.mp3',
-    frog: 'assets/sounds/animals/frog.mp3'
+    cat: 'assets/sounds/animals/cat.ogg',
+    chicken: 'assets/sounds/animals/chicken.ogg',
+    cow: 'assets/sounds/animals/cow.ogg',
+    dog: 'assets/sounds/animals/dog.ogg',
+    elephant: 'assets/sounds/animals/elephant.ogg',
+    monkey: 'assets/sounds/animals/monkey.ogg',
+    pig: 'assets/sounds/animals/pig.ogg',
+    rabbit: 'assets/sounds/animals/rabbit.ogg',
+    frog: 'assets/sounds/animals/frog.ogg'
   };
 
   private readonly effectMap: Record<EffectKey, string> = {
-    button: 'assets/sounds/button-press.mp3',
-    flip: 'assets/sounds/card-flip.mp3',
-    victory: 'assets/sounds/victory.mp3'
+    button: 'assets/sounds/button-press.ogg',
+    flip: 'assets/sounds/card-flip.ogg',
+    victory: 'assets/sounds/victory.ogg'
   };
 
   private readonly musicPlaylist = [
-    'assets/sounds/background-music/1.mp3',
-    'assets/sounds/background-music/2.mp3',
-    'assets/sounds/background-music/3.mp3'
+    'assets/sounds/background-music/1.ogg',
+    'assets/sounds/background-music/2.ogg',
+    'assets/sounds/background-music/3.ogg'
   ];
 
   private readonly musicAudio = new Audio();
@@ -51,6 +51,7 @@ export class AudioService {
         this.playNextTrack();
       }
     });
+    this.bindAppVisibilityHandlers();
   }
 
   updateSettings(soundOn: boolean, musicOn: boolean): void {
@@ -126,6 +127,31 @@ export class AudioService {
     const audio = new Audio(src);
     audio.volume = volume;
     audio.play().catch(() => undefined);
+  }
+
+  private bindAppVisibilityHandlers(): void {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          this.musicAudio.pause();
+          return;
+        }
+        if (this.musicOn && this.musicStarted) {
+          this.musicAudio.play().catch(() => undefined);
+        }
+      });
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('blur', () => {
+        this.musicAudio.pause();
+      });
+      window.addEventListener('focus', () => {
+        if (this.musicOn && this.musicStarted && !document?.hidden) {
+          this.musicAudio.play().catch(() => undefined);
+        }
+      });
+    }
   }
 
   private loadSettings(): void {

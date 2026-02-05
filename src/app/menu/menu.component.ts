@@ -17,6 +17,7 @@ const SETTINGS_KEY = 'memory-game-settings-v1';
 
 @Component({
     selector: 'app-menu',
+    standalone: true,
     imports: [RouterModule],
     templateUrl: './menu.component.html',
     styleUrl: './menu.component.scss'
