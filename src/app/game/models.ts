@@ -1,4 +1,4 @@
-export type CategoryId = 'animals' | 'letters' | 'numbers';
+export type CategoryId = 'animals' | 'letters' | 'numbers' | 'hospital' | 'utility-cars';
 
 export type MatchSize = 2 | 3 | 4;
 
@@ -45,6 +45,9 @@ export interface SymbolItem {
   value: string;
   display: string;
   imageUrl?: string;
+  spriteIndex?: number;
+  spriteColumns?: number;
+  spriteRows?: number;
 }
 
 export type CardState = 'hidden' | 'revealed' | 'matched';
@@ -54,6 +57,9 @@ export interface Card {
   value: string;
   display: string;
   imageUrl?: string;
+  spriteIndex?: number;
+  spriteColumns?: number;
+  spriteRows?: number;
   state: CardState;
 }
 

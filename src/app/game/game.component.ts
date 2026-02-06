@@ -15,6 +15,8 @@ import {
 } from './models';
 import { I18nService } from '../i18n/i18n.service';
 import { AudioService } from '../audio/audio.service';
+import { PurchaseService } from '../monetization/purchase.service';
+import { PREMIUM_CATEGORY_BY_ID } from '../monetization/pack-catalog';
 
 interface ConfettiPiece {
   left: number;
@@ -40,7 +42,9 @@ export class GameComponent implements OnInit {
   readonly categories: Array<{ id: CategoryId; labelKey: string; emoji: string }> = [
     { id: 'animals', labelKey: 'category.animals', emoji: '🐾' },
     { id: 'letters', labelKey: 'category.letters', emoji: '🔤' },
-    { id: 'numbers', labelKey: 'category.numbers', emoji: '🔢' }
+    { id: 'numbers', labelKey: 'category.numbers', emoji: '🔢' },
+    { id: 'hospital', labelKey: 'category.hospital', emoji: '🏥' },
+    { id: 'utility-cars', labelKey: 'category.utilityCars', emoji: '🚚' }
   ];
 
   readonly symbolsByCategory: Record<CategoryId, SymbolItem[]> = {
@@ -62,10 +66,32 @@ export class GameComponent implements OnInit {
     numbers: Array.from({ length: 10 }, (_, index) => {
       const value = String(index);
       return { value, display: value, imageUrl: `assets/cards/numbers/${value}.webp` };
-    })
+    }),
+    hospital: Array.from({ length: 12 }, (_, index) => ({
+      value: `hospital_${index + 1}`,
+      display: `H${index + 1}`,
+      imageUrl: 'assets/cards/hospital-sprites/hospital-sprite.webp',
+      spriteIndex: index,
+      spriteColumns: 3,
+      spriteRows: 4
+    })),
+    'utility-cars': [
+      { value: 'ambulance', display: 'Ambulance', imageUrl: 'assets/cards/utility-cars/Ambulance.png' },
+      { value: 'excavator', display: 'Excavator', imageUrl: 'assets/cards/utility-cars/excavator.png' },
+      { value: 'firetruck', display: 'Firetruck', imageUrl: 'assets/cards/utility-cars/firetruck.png' },
+      { value: 'garbage_truck', display: 'Garbage Truck', imageUrl: 'assets/cards/utility-cars/garbage-truck.png' },
+      { value: 'ice_cream_truck', display: 'Ice Cream Truck', imageUrl: 'assets/cards/utility-cars/ice-cream-truck.png' },
+      { value: 'police', display: 'Police', imageUrl: 'assets/cards/utility-cars/police.png' },
+      { value: 'race_car', display: 'Race Car', imageUrl: 'assets/cards/utility-cars/race-car.png' },
+      { value: 'school_bus', display: 'School Bus', imageUrl: 'assets/cards/utility-cars/school-bus.png' },
+      { value: 'taxi', display: 'Taxi', imageUrl: 'assets/cards/utility-cars/taxi.png' },
+      { value: 'tractor', display: 'Tractor', imageUrl: 'assets/cards/utility-cars/tractor.png' },
+      { value: 'truck', display: 'Truck', imageUrl: 'assets/cards/utility-cars/truck.png' }
+    ]
   };
 
   stage: 'select' | 'play' = 'select';
+  selectedCategories: CategoryId[] = ['animals'];
   selectedCategory: CategoryId = 'animals';
   selectedMatchSize: MatchSize = 2;
   selectedGridId = defaultGridIdForSize(2);
@@ -86,20 +112,53 @@ export class GameComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     public readonly i18n: I18nService,
-    private readonly audio: AudioService
+    private readonly audio: AudioService,
+    private readonly purchases: PurchaseService
   ) {}
 
   ngOnInit(): void {
+    void this.purchases.init();
     const categoryParam = this.route.snapshot.queryParamMap.get('category');
+    const categoriesParam = this.route.snapshot.queryParamMap.get('categories');
     const sizeParam = this.route.snapshot.queryParamMap.get('size');
     const rowsParam = this.route.snapshot.queryParamMap.get('rows');
     const colsParam = this.route.snapshot.queryParamMap.get('cols');
     const soundParam = this.route.snapshot.queryParamMap.get('sound');
     const musicParam = this.route.snapshot.queryParamMap.get('music');
 
-    if (categoryParam === 'animals' || categoryParam === 'letters' || categoryParam === 'numbers') {
-      this.selectedCategory = categoryParam;
+    if (categoriesParam) {
+      const parsed = categoriesParam
+        .split(',')
+        .map((item) => item.trim())
+        .filter(
+          (item): item is CategoryId =>
+            item === 'animals' ||
+            item === 'letters' ||
+            item === 'numbers' ||
+            item === 'hospital' ||
+            item === 'utility-cars'
+        );
+      if (parsed.length) {
+        this.selectedCategories = parsed;
+      }
     }
+
+    if (
+      categoryParam === 'animals' ||
+      categoryParam === 'letters' ||
+      categoryParam === 'numbers' ||
+      categoryParam === 'hospital' ||
+      categoryParam === 'utility-cars'
+    ) {
+      this.selectedCategory = categoryParam;
+      if (!this.selectedCategories.includes(categoryParam)) {
+        this.selectedCategories = [categoryParam];
+      }
+    }
+
+    const unlocked = this.selectedCategories.filter((category) => this.purchases.isCategoryUnlocked(category));
+    this.selectedCategories = unlocked.length ? unlocked : [this.purchases.getFallbackCategory()];
+    this.selectedCategory = this.selectedCategories[0];
 
     if (soundParam !== null) {
       this.soundOn = soundParam !== 'false';
@@ -128,7 +187,7 @@ export class GameComponent implements OnInit {
 
     this.loadAudioSettings();
 
-    if (categoryParam || sizeParam || (rows && cols)) {
+    if (categoryParam || categoriesParam || sizeParam || (rows && cols)) {
       this.startGame();
     }
   }
@@ -161,14 +220,19 @@ export class GameComponent implements OnInit {
         return 'assets/cards/numbers/back-card.webp';
       case 'letters':
         return 'assets/cards/letters/back-card.webp';
+      case 'utility-cars':
+        return 'assets/cards/utility-cars/back-card.png';
       default:
         return 'assets/cards/animals/back-card.webp';
     }
   }
 
   get selectedCategoryLabel(): string {
-    const category = this.categories.find((item) => item.id === this.selectedCategory);
-    return category ? this.i18n.t(category.labelKey) : '';
+    const labels = this.selectedCategories
+      .map((category) => this.categories.find((item) => item.id === category))
+      .filter((item): item is { id: CategoryId; labelKey: string; emoji: string } => Boolean(item))
+      .map((item) => this.i18n.t(item.labelKey));
+    return labels.join(', ');
   }
 
   get progressPercent(): number {
@@ -179,6 +243,10 @@ export class GameComponent implements OnInit {
   }
 
   selectCategory(category: CategoryId): void {
+    if (!this.purchases.isCategoryUnlocked(category)) {
+      return;
+    }
+    this.selectedCategories = [category];
     this.selectedCategory = category;
     this.audio.playButton();
     this.startGame();
@@ -240,7 +308,8 @@ export class GameComponent implements OnInit {
       throw new Error('Configuratie invalida: numarul de carti nu se potriveste cu matchSize.');
     }
 
-    const symbols = this.pickSymbols(this.symbolsByCategory[this.selectedCategory], uniqueNeeded);
+    const combinedPool = this.selectedCategories.flatMap((category) => this.symbolsByCategory[category]);
+    const symbols = this.pickSymbols(combinedPool, uniqueNeeded);
     const deck: Card[] = [];
     let idCounter = 1;
 
@@ -251,6 +320,9 @@ export class GameComponent implements OnInit {
           value: symbol.value,
           display: symbol.display,
           imageUrl: symbol.imageUrl,
+          spriteIndex: symbol.spriteIndex,
+          spriteColumns: symbol.spriteColumns,
+          spriteRows: symbol.spriteRows,
           state: 'hidden'
         });
         idCounter += 1;
@@ -288,6 +360,15 @@ export class GameComponent implements OnInit {
 
   trackCard(_: number, card: Card): number {
     return card.id;
+  }
+
+  isCategoryUnlocked(category: CategoryId): boolean {
+    return this.purchases.isCategoryUnlocked(category);
+  }
+
+  categoryPrice(category: CategoryId): string | null {
+    const pack = PREMIUM_CATEGORY_BY_ID[category];
+    return pack && !pack.isFree ? pack.priceLabel : null;
   }
 
   private evaluateMatch(): void {

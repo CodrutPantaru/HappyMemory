@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AdMobService } from './ads/admob.service';
 import { AudioService } from './audio/audio.service';
+import { PurchaseService } from './monetization/purchase.service';
 
 @Component({
     selector: 'app-root',
@@ -17,7 +18,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly ads: AdMobService,
-    private readonly audio: AudioService
+    private readonly audio: AudioService,
+    private readonly purchases: PurchaseService
   ) {}
 
   ngOnInit(): void {
@@ -25,6 +27,8 @@ export class AppComponent implements OnInit, OnDestroy {
     document.addEventListener('dragstart', this.preventDefaultHandler);
     document.addEventListener('selectstart', this.preventDefaultHandler);
     this.ads.init();
+    void this.purchases.init();
+    void this.ads.init();
     this.audio.startMusicIfEnabled();
   }
 

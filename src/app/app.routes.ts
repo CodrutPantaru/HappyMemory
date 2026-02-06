@@ -9,5 +9,9 @@ export const routes: Routes = [
     path: 'game',
     loadComponent: () => import('./game/game.component').then((m) => m.GameComponent)
   },
+  {
+    path: 'configure-pack',
+    loadComponent: () => import('./pack-config/pack-config.component').then((m) => m.PackConfigComponent)
+  },
   { path: '**', redirectTo: '' }
 ];

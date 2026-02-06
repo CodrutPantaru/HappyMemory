@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 import { Card } from './models';
 
@@ -20,13 +20,15 @@ import { Card } from './models';
           <img class="card-image back" [src]="backImageUrl" alt="Back card" />
         </div>
         <div class="card-face card-back">
-          @if (card.imageUrl) {
-            <img
-              class="card-image"
-              [class.animal-image]="card.imageUrl.includes('/animals/')"
-              [src]="card.imageUrl"
-              [alt]="card.display"
-            />
+          @if (hasSprite) {
+            <div
+              class="card-sprite"
+              [style.backgroundImage]="'url(' + card.imageUrl + ')'"
+              [style.backgroundPosition]="spritePosition"
+              [style.backgroundSize]="spriteSize"
+            ></div>
+          } @else if (card.imageUrl) {
+            <img class="card-image" [src]="card.imageUrl" [alt]="card.display" [class.animal-image]="card.imageUrl.includes('/animals/')"/>
           } @else {
             {{ card.display }}
           }
@@ -36,15 +38,46 @@ import { Card } from './models';
     `,
     styleUrl: './card.component.scss'
 })
-export class CardComponent {
+export class CardComponent implements OnInit{
   @Input({ required: true }) card!: Card;
   @Input({ required: true }) backImageUrl!: string;
   @Input() disabled = false;
   @Output() reveal = new EventEmitter<Card>();
 
+  ngOnInit(): void {
+    console.log(`${this.card.spriteIndex} CardComponent initialized with card:`, this.card);
+  }
+
   handleClick(): void {
     if (this.card) {
       this.reveal.emit(this.card);
     }
+  }
+
+  get hasSprite(): boolean {
+    return (
+      typeof this.card.spriteIndex === 'number' &&
+      typeof this.card.spriteColumns === 'number' &&
+      typeof this.card.spriteRows === 'number' &&
+      !!this.card.imageUrl
+    );
+  }
+
+  get spritePosition(): string {
+    if (!this.hasSprite) {
+      return '0% 0%';
+    }
+    const index = this.card.spriteIndex as number;
+    const positions = [
+      '15% 17%', '51% 17%', '85% 17%',
+      '15% 39%', '51% 39%', '85% 39%',
+      '15% 61%', '51% 61%', '88% 61%',
+      '15% 83%', '51% 83%', '87% 83%'
+    ];
+    return positions[index] || positions[0];
+}
+
+  get spriteSize(): string {
+    return '400% 600%';
   }
 }

@@ -43,22 +43,27 @@
       </div>
     }
 
-    @if (stage === 'select') {
-      <section class="select">
-        <div class="select-card">
-          <div class="select-title">{{ i18n.t('game.chooseCategory') }}</div>
-          <div class="choice-grid">
-            @for (category of categories; track category) {
-              <button
-                class="choice-card"
-                (click)="selectCategory(category.id)"
-                >
-                <div class="choice-emoji">{{ category.emoji }}</div>
-                <div class="choice-text">{{ i18n.t(category.labelKey) }}</div>
-              </button>
-            }
-          </div>
+  @if (stage === 'select') {
+    <section class="select">
+      <div class="select-card">
+        <div class="select-title">{{ i18n.t('game.chooseCategory') }}</div>
+        <div class="choice-grid">
+          @for (category of categories; track category) {
+            <button
+              class="choice-card"
+              [class.locked]="!isCategoryUnlocked(category.id)"
+              [disabled]="!isCategoryUnlocked(category.id)"
+              (click)="selectCategory(category.id)"
+              >
+              <div class="choice-emoji">{{ category.emoji }}</div>
+              <div class="choice-text">{{ i18n.t(category.labelKey) }}</div>
+              @if (!isCategoryUnlocked(category.id)) {
+                <div class="choice-lock">🔒 {{ categoryPrice(category.id) }}</div>
+              }
+            </button>
+          }
         </div>
+      </div>
         <div class="select-card">
           <div class="select-title">{{ i18n.t('settings.matchSize') }}</div>
           <div class="choice-grid">
