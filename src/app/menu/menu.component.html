@@ -56,6 +56,10 @@
         <span class="icon">🎯</span>
         {{ i18n.t('settings.difficulty') }}
       </button>
+      <button class="secondary history-btn" type="button" (click)="goToHistory()" aria-label="Istoric">
+        <span class="icon">📊</span>
+        {{ i18n.t('home.history') }}
+      </button>
       <button
         class="language-flag"
         type="button"
@@ -142,3 +146,4 @@
     </button>
   </div>
 }
+

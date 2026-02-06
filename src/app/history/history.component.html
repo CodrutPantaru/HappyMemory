@@ -1,0 +1,41 @@
+<div class="history-shell">
+  <header class="top-bar">
+    <a class="back-link" routerLink="/" [attr.aria-label]="i18n.t('game.back')">←</a>
+    <div class="title">{{ i18n.t('home.historyTitle') }}</div>
+  </header>
+
+  <main class="page-content">
+    @if (topScore !== null) {
+      <section class="summary">
+        <div class="summary-label">{{ i18n.t('home.bestScore') }}</div>
+        <div class="summary-score">{{ topScore }}</div>
+      </section>
+    }
+
+    @if (recentGames.length === 0) {
+      <section class="empty">
+        {{ i18n.t('home.historyEmpty') }}
+      </section>
+    } @else {
+      <section class="list">
+        @for (entry of recentGames; track entry.id) {
+          <article class="row">
+            <div class="row-main">
+              <div class="pack">{{ historyCategoryLabel(entry) }}</div>
+              <div class="meta">
+                {{ historyPlayedAt(entry) }} | {{ matchSizeLabel(entry.matchSize) }} | {{ entry.gridId }}
+              </div>
+            </div>
+            <div class="stats">
+              <div>{{ i18n.t('home.historyScore') }}: {{ entry.score }}</div>
+              <div>{{ i18n.t('home.historyMoves') }}: {{ entry.moves }}</div>
+            </div>
+          </article>
+        }
+      </section>
+    }
+  </main>
+
+  <footer class="bottom-footer" aria-hidden="true"></footer>
+  <div class="ad-container" aria-hidden="true"></div>
+</div>

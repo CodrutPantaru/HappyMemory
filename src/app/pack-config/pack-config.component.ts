@@ -30,12 +30,14 @@ const SETTINGS_KEY = 'memory-game-settings-v1';
   styleUrl: './pack-config.component.scss'
 })
 export class PackConfigComponent implements OnInit {
+  selectionMode: 'single' | 'mixed' = 'single';
+
   readonly categories: Array<{ id: CategoryId; labelKey: string; imageUrl: string }> = [
     { id: 'animals', labelKey: 'category.animals', imageUrl: 'assets/cards/animals/cat.webp' },
     { id: 'letters', labelKey: 'category.letters', imageUrl: 'assets/cards/letters/A.webp' },
     { id: 'numbers', labelKey: 'category.numbers', imageUrl: 'assets/cards/numbers/1.webp' },
-    { id: 'hospital', labelKey: 'category.hospital', imageUrl: 'assets/cards/hospital-sprites/hospital-thumb.png' },
-    { id: 'utility-cars', labelKey: 'category.utilityCars', imageUrl: 'assets/cards/utility-cars/taxi.png' }
+    { id: 'hospital', labelKey: 'category.hospital', imageUrl: 'assets/cards/hospital-sprites/thumb.webp' },
+    { id: 'utility-cars', labelKey: 'category.utilityCars', imageUrl: 'assets/cards/utility-cars/taxi.webp' }
   ];
 
   selectedCategories: CategoryId[] = ['animals'];
@@ -69,10 +71,11 @@ export class PackConfigComponent implements OnInit {
 
     const unlocked = this.selectedCategories.filter((category) => this.isCategoryUnlocked(category));
     this.selectedCategories = unlocked.length ? unlocked : [this.purchases.getFallbackCategory()];
+    this.selectionMode = this.selectedCategories.length > 1 ? 'mixed' : 'single';
   }
 
   get availableCategories(): Array<{ id: CategoryId; labelKey: string; imageUrl: string }> {
-    return this.categories.filter((category) => this.isCategoryUnlocked(category.id));
+    return this.categories;
   }
 
   get premiumCategories(): Array<{ id: CategoryId; labelKey: string; imageUrl: string }> {
@@ -84,6 +87,12 @@ export class PackConfigComponent implements OnInit {
     if (!this.isCategoryUnlocked(category)) {
       return;
     }
+
+    if (this.selectionMode === 'single') {
+      this.selectedCategories = [category];
+      return;
+    }
+
     if (this.selectedCategories.includes(category)) {
       if (this.selectedCategories.length > 1) {
         this.selectedCategories = this.selectedCategories.filter((item) => item !== category);
@@ -91,7 +100,17 @@ export class PackConfigComponent implements OnInit {
     } else {
       this.selectedCategories = [...this.selectedCategories, category];
     }
-    this.persistSettings();
+  }
+
+  setSelectionMode(mode: 'single' | 'mixed'): void {
+    if (this.selectionMode === mode) {
+      return;
+    }
+    this.audio.playButton();
+    this.selectionMode = mode;
+    if (mode === 'single') {
+      this.selectedCategories = [this.selectedCategories[0] ?? this.purchases.getFallbackCategory()];
+    }
   }
 
   saveAndBack(): void {
@@ -130,7 +149,6 @@ export class PackConfigComponent implements OnInit {
       if (this.isCategoryUnlocked(category) && !this.selectedCategories.includes(category)) {
         this.selectedCategories = [...this.selectedCategories, category];
       }
-      this.persistSettings();
     } finally {
       this.isPurchaseBusy = false;
     }
@@ -143,7 +161,6 @@ export class PackConfigComponent implements OnInit {
         this.selectedCategories = [...this.selectedCategories, category];
       }
     }
-    this.persistSettings();
   }
 
   private persistSettings(): void {

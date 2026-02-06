@@ -22,10 +22,10 @@ export interface PremiumProduct {
 
 export const CATEGORY_PACKS: CategoryPack[] = [
   { category: 'animals', productId: null, isFree: true, priceLabel: 'Free' },
-  { category: 'letters', productId: 'pack_letters', isFree: false, priceLabel: 'EUR 2.99' },
-  { category: 'numbers', productId: 'pack_numbers', isFree: false, priceLabel: 'EUR 2.99' },
-  { category: 'hospital', productId: 'pack_hospital', isFree: false, priceLabel: 'EUR 3.99' },
-  { category: 'utility-cars', productId: 'pack_utility_cars', isFree: false, priceLabel: 'EUR 3.99' }
+  { category: 'letters', productId: null, isFree: true, priceLabel: 'Free' },
+  { category: 'numbers', productId: null, isFree: true, priceLabel: 'Free' },
+  { category: 'hospital', productId: null, isFree: true, priceLabel: 'Free' },
+  { category: 'utility-cars', productId: null, isFree: true, priceLabel: 'Free' }
 ];
 
 export const PREMIUM_PRODUCTS: PremiumProduct[] = [

@@ -28,8 +28,8 @@ export class MenuComponent implements OnInit {
     { id: 'animals', labelKey: 'category.animals', imageUrl: 'assets/cards/animals/cat.webp' },
     { id: 'letters', labelKey: 'category.letters', imageUrl: 'assets/cards/letters/A.webp' },
     { id: 'numbers', labelKey: 'category.numbers', imageUrl: 'assets/cards/numbers/1.webp' },
-    { id: 'hospital', labelKey: 'category.hospital', imageUrl: 'assets/cards/hospital-sprites/hospital-thumb.png' },
-    { id: 'utility-cars', labelKey: 'category.utilityCars', imageUrl: 'assets/cards/utility-cars/taxi.png' }
+    { id: 'hospital', labelKey: 'category.hospital', imageUrl: 'assets/cards/hospital-sprites/thumb.webp' },
+    { id: 'utility-cars', labelKey: 'category.utilityCars', imageUrl: 'assets/cards/utility-cars/taxi.webp' }
   ];
 
   readonly matchSizes: MatchSize[] = [2, 3, 4];
@@ -150,6 +150,11 @@ export class MenuComponent implements OnInit {
   goToPackConfig(): void {
     this.audio.playButton();
     this.router.navigate(['/configure-pack']);
+  }
+
+  goToHistory(): void {
+    this.audio.playButton();
+    this.router.navigate(['/history']);
   }
 
   openDifficultyModal(): void {

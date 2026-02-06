@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "assets:png2webp": "node scripts/convert-png-to-webp.mjs",
     "aab": "npm run build && npx cap sync android && cd android && powershell -NoProfile -Command \"$env:JAVA_HOME='C:\\\\Program Files\\\\Java\\\\jdk-21.0.10'; $env:ANDROID_HOME='D:\\\\android-sdk'; $env:ANDROID_SDK_ROOT='D:\\\\android-sdk'; .\\\\gradlew bundleRelease\"",
     "apk": "npm run build && npx cap sync android && cd android && powershell -NoProfile -Command \"$env:JAVA_HOME='C:\\\\Program Files\\\\Java\\\\jdk-21.0.10'; $env:ANDROID_HOME='D:\\\\android-sdk'; $env:ANDROID_SDK_ROOT='D:\\\\android-sdk'; .\\\\gradlew assembleRelease\"",
     "watch": "ng build --watch --configuration development",

@@ -13,5 +13,9 @@ export const routes: Routes = [
     path: 'configure-pack',
     loadComponent: () => import('./pack-config/pack-config.component').then((m) => m.PackConfigComponent)
   },
+  {
+    path: 'history',
+    loadComponent: () => import('./history/history.component').then((m) => m.HistoryComponent)
+  },
   { path: '**', redirectTo: '' }
 ];

@@ -658,3 +658,54 @@
     zoom: 0.65;
   }  
 }
+
+/* Respect phone status bar / notch */
+:host {
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+.menu-shell {
+  padding-top: var(--safe-top);
+  height: calc(100dvh - var(--safe-top));
+}
+
+/* Keep landing options visible after orientation change */
+@media (orientation: landscape) and (max-height: 520px) {
+  .page-content {
+    overflow-y: auto;
+    padding: 4px 10px 8px;
+  }
+
+  .logo-float {
+    display: none !important;
+  }
+
+  .home-content {
+    align-items: start;
+  }
+
+  .action-card {
+    margin-top: 10px !important;
+    zoom: 0.82 !important;
+    transform-origin: top center;
+    width: min(620px, 100%);
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .primary {
+    min-height: 42px;
+    font-size: 0.9rem;
+  }
+
+  .secondary {
+    min-height: 34px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 460px) {
+  .action-card {
+    zoom: 0.72 !important;
+  }
+}

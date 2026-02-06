@@ -1,53 +1,57 @@
-﻿<div class="configure-shell">
+<div class="configure-shell">
   <header class="top-bar">
     <button class="nav-icon" type="button" (click)="backToMenu()" [attr.aria-label]="i18n.t('game.back')">
-      ←
+      &larr;
     </button>
     <div class="nav-title">{{ i18n.t('home.configurePack') }}</div>
     <div></div>
   </header>
 
-  <section class="config-card">
-    <div class="section-title">Pachete disponibile</div>
-    <div class="pack-grid two-rows">
-      @for (category of availableCategories; track category.id) {
+  <main class="config-content">
+    <section class="config-card">
+      <div class="section-title">Pachete disponibile</div>
+      <div class="mode-switch" [attr.aria-label]="i18n.t('pack.mode.label')">
         <button
-          class="pack-card"
-          [class.active]="isCategorySelected(category.id)"
-          (click)="setCategory(category.id)"
-          [attr.aria-pressed]="isCategorySelected(category.id)"
-          [attr.aria-label]="i18n.t(category.labelKey)"
-        >
-          <img class="pack-card-image" [src]="category.imageUrl" [alt]="i18n.t(category.labelKey)" />
-          <span class="pack-card-name">{{ i18n.t(category.labelKey) }}</span>
-        </button>
-      }
-    </div>
-  </section>
-
-  <section class="config-card">
-    <div class="section-title">Pachete Premium</div>
-    <div class="pack-grid two-rows">
-      @for (category of premiumCategories; track category.id) {
-        <button
-          class="pack-card locked"
+          class="mode-chip"
+          [class.active]="selectionMode === 'single'"
           type="button"
-          (click)="buyCategory(category.id)"
-          [disabled]="isPurchaseBusy"
-          [attr.aria-label]="i18n.t('paywall.buy') + ' ' + i18n.t(category.labelKey)"
+          (click)="setSelectionMode('single')"
+          [attr.aria-pressed]="selectionMode === 'single'"
         >
-          <img class="pack-card-image" [src]="category.imageUrl" [alt]="i18n.t(category.labelKey)" />
-          <span class="pack-card-name">{{ i18n.t(category.labelKey) }}</span>
-          <span class="pack-card-lock">🔒 {{ categoryPrice(category.id) }}</span>
+          {{ i18n.t('pack.mode.single') }}
         </button>
-      }
-    </div>
-    <button class="restore-link" type="button" (click)="restorePurchases()" [disabled]="isPurchaseBusy">
-      {{ i18n.t('paywall.restore') }}
-    </button>
-  </section>
+        <button
+          class="mode-chip"
+          [class.active]="selectionMode === 'mixed'"
+          type="button"
+          (click)="setSelectionMode('mixed')"
+          [attr.aria-pressed]="selectionMode === 'mixed'"
+        >
+          {{ i18n.t('pack.mode.mixed') }}
+        </button>
+      </div>
+      <div class="pack-grid two-rows">
+        @for (category of availableCategories; track category.id) {
+          <button
+            class="pack-card"
+            [class.active]="isCategorySelected(category.id)"
+            (click)="setCategory(category.id)"
+            [attr.aria-pressed]="isCategorySelected(category.id)"
+            [attr.aria-label]="i18n.t(category.labelKey)"
+          >
+            <img class="pack-card-image" [src]="category.imageUrl" [alt]="i18n.t(category.labelKey)" />
+            <span class="pack-card-name">{{ i18n.t(category.labelKey) }}</span>
+          </button>
+        }
+      </div>
+    </section>
+  </main>
 
-  <div class="sticky-save">
-    <button class="save-button" type="button" (click)="saveAndBack()">{{ i18n.t('settings.save') }}</button>
-  </div>
+  <footer class="bottom-footer">
+    <div class="sticky-save">
+      <button class="save-button" type="button" (click)="saveAndBack()">{{ i18n.t('settings.save') }}</button>
+    </div>
+  </footer>
+
+  <div class="ad-container" aria-hidden="true"></div>
 </div>

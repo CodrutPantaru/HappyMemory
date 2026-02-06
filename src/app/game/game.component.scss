@@ -439,3 +439,13 @@ button.ghost:active,
   }
 }
 
+/* Respect phone status bar / notch */
+:host {
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+.game-shell {
+  padding-top: var(--safe-top);
+  height: calc(100dvh - var(--safe-top));
+}
+

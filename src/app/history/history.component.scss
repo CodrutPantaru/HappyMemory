@@ -1,0 +1,137 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  --header-height: 60px;
+  --footer-height: 60px;
+  --ad-safe-height: 72px;
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+.history-shell {
+  display: grid;
+  grid-template-rows: var(--header-height) minmax(0, 1fr) var(--footer-height) var(--ad-safe-height);
+  height: calc(100dvh - var(--safe-top));
+  padding-top: var(--safe-top);
+}
+
+.top-bar {
+  width: calc(100% - 32px);
+  margin: 0 auto;
+  height: var(--header-height);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #5dd05b 0%, #8eea63 50%, #4acb7b 100%);
+  box-shadow: 0 18px 36px rgba(18, 12, 8, 0.18);
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.back-link {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: #1f1b16;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f3a1b;
+}
+
+.page-content {
+  overflow-y: auto;
+  min-height: 0;
+  padding: 10px 14px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.summary {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 12px;
+  box-shadow: 0 10px 22px rgba(18, 12, 8, 0.1);
+  text-align: center;
+}
+
+.summary-label {
+  font-size: 0.84rem;
+  color: #2f3b2b;
+  opacity: 0.9;
+}
+
+.summary-score {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #245534;
+}
+
+.empty {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 14px;
+  box-shadow: 0 10px 22px rgba(18, 12, 8, 0.1);
+  color: #2f3b2b;
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  border-radius: 12px;
+  background: rgba(240, 248, 231, 0.92);
+  padding: 10px;
+}
+
+.pack {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #2f3b2b;
+}
+
+.meta {
+  font-size: 0.76rem;
+  color: #48614f;
+}
+
+.stats {
+  text-align: right;
+  font-size: 0.76rem;
+  color: #245534;
+  font-weight: 700;
+}
+
+.bottom-footer {
+  height: var(--footer-height);
+}
+
+.ad-container {
+  height: var(--ad-safe-height);
+}
+
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .stats {
+    text-align: left;
+  }
+}

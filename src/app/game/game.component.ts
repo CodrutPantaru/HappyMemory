@@ -17,6 +17,7 @@ import { I18nService } from '../i18n/i18n.service';
 import { AudioService } from '../audio/audio.service';
 import { PurchaseService } from '../monetization/purchase.service';
 import { PREMIUM_CATEGORY_BY_ID } from '../monetization/pack-catalog';
+import { GameHistoryService } from '../history/game-history.service';
 
 interface ConfettiPiece {
   left: number;
@@ -76,17 +77,17 @@ export class GameComponent implements OnInit {
       spriteRows: 4
     })),
     'utility-cars': [
-      { value: 'ambulance', display: 'Ambulance', imageUrl: 'assets/cards/utility-cars/Ambulance.png' },
-      { value: 'excavator', display: 'Excavator', imageUrl: 'assets/cards/utility-cars/excavator.png' },
-      { value: 'firetruck', display: 'Firetruck', imageUrl: 'assets/cards/utility-cars/firetruck.png' },
-      { value: 'garbage_truck', display: 'Garbage Truck', imageUrl: 'assets/cards/utility-cars/garbage-truck.png' },
-      { value: 'ice_cream_truck', display: 'Ice Cream Truck', imageUrl: 'assets/cards/utility-cars/ice-cream-truck.png' },
-      { value: 'police', display: 'Police', imageUrl: 'assets/cards/utility-cars/police.png' },
-      { value: 'race_car', display: 'Race Car', imageUrl: 'assets/cards/utility-cars/race-car.png' },
-      { value: 'school_bus', display: 'School Bus', imageUrl: 'assets/cards/utility-cars/school-bus.png' },
-      { value: 'taxi', display: 'Taxi', imageUrl: 'assets/cards/utility-cars/taxi.png' },
-      { value: 'tractor', display: 'Tractor', imageUrl: 'assets/cards/utility-cars/tractor.png' },
-      { value: 'truck', display: 'Truck', imageUrl: 'assets/cards/utility-cars/truck.png' }
+      { value: 'ambulance', display: 'Ambulance', imageUrl: 'assets/cards/utility-cars/Ambulance.webp' },
+      { value: 'excavator', display: 'Excavator', imageUrl: 'assets/cards/utility-cars/excavator.webp' },
+      { value: 'firetruck', display: 'Firetruck', imageUrl: 'assets/cards/utility-cars/firetruck.webp' },
+      { value: 'garbage_truck', display: 'Garbage Truck', imageUrl: 'assets/cards/utility-cars/garbage-truck.webp' },
+      { value: 'ice_cream_truck', display: 'Ice Cream Truck', imageUrl: 'assets/cards/utility-cars/ice-cream-truck.webp' },
+      { value: 'police', display: 'Police', imageUrl: 'assets/cards/utility-cars/police.webp' },
+      { value: 'race_car', display: 'Race Car', imageUrl: 'assets/cards/utility-cars/race-car.webp' },
+      { value: 'school_bus', display: 'School Bus', imageUrl: 'assets/cards/utility-cars/school-bus.webp' },
+      { value: 'taxi', display: 'Taxi', imageUrl: 'assets/cards/utility-cars/taxi.webp' },
+      { value: 'tractor', display: 'Tractor', imageUrl: 'assets/cards/utility-cars/tractor.webp' },
+      { value: 'truck', display: 'Truck', imageUrl: 'assets/cards/utility-cars/truck.webp' }
     ]
   };
 
@@ -113,7 +114,8 @@ export class GameComponent implements OnInit {
     private readonly route: ActivatedRoute,
     public readonly i18n: I18nService,
     private readonly audio: AudioService,
-    private readonly purchases: PurchaseService
+    private readonly purchases: PurchaseService,
+    private readonly history: GameHistoryService
   ) {}
 
   ngOnInit(): void {
@@ -221,7 +223,9 @@ export class GameComponent implements OnInit {
       case 'letters':
         return 'assets/cards/letters/back-card.webp';
       case 'utility-cars':
-        return 'assets/cards/utility-cars/back-card.png';
+        return 'assets/cards/utility-cars/back-card.webp';
+      case 'hospital':
+        return 'assets/cards/hospital-sprites/back-card.webp';
       default:
         return 'assets/cards/animals/back-card.webp';
     }
@@ -386,6 +390,13 @@ export class GameComponent implements OnInit {
       this.audio.playMatchSound(first.value);
       this.isWin = this.matchesFound === this.totalMatches;
       if (this.isWin) {
+        this.history.recordGame({
+          categories: this.selectedCategories,
+          matchSize: this.selectedMatchSize,
+          gridId: this.currentGrid.id,
+          moves: this.moves,
+          totalMatches: this.totalMatches
+        });
         this.confettiPieces = this.createConfetti();
         this.audio.playVictory();
       }
