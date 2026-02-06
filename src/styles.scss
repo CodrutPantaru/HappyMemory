@@ -13,6 +13,10 @@ body {
   background-size: cover;
   background-position: center bottom;
   background-repeat: no-repeat;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body::before {
@@ -26,4 +30,22 @@ body::before {
 
 button {
   font-family: inherit;
+  touch-action: manipulation;
+}
+
+a,
+img,
+.no-longpress {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: manipulation;
+}
+
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
 }

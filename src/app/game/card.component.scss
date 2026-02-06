@@ -43,6 +43,11 @@
   display: block;
 }
 
+.card-image.animal-image {
+  transform: scale(1.16);
+  transform-origin: center;
+}
+
 .card-image.back {
   object-fit: contain;
   background: #ffffff;

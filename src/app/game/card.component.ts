@@ -21,7 +21,12 @@ import { Card } from './models';
         </div>
         <div class="card-face card-back">
           @if (card.imageUrl) {
-            <img class="card-image" [src]="card.imageUrl" [alt]="card.display" />
+            <img
+              class="card-image"
+              [class.animal-image]="card.imageUrl.includes('/animals/')"
+              [src]="card.imageUrl"
+              [alt]="card.display"
+            />
           } @else {
             {{ card.display }}
           }

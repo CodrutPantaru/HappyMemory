@@ -1,4 +1,4 @@
-﻿<div class="game-shell">
+<div class="game-shell">
   <header class="top-bar">
     <a
       class="nav-icon"
@@ -33,83 +33,88 @@
     </div>
   </header>
 
-  @if (stage === 'play') {
-    <div class="progress-wrap">
-      <div class="progress-track">
-        <div class="progress-fill" [style.width.%]="progressPercent"></div>
+  <main class="page-content" [class.is-play]="stage === 'play'">
+    @if (stage === 'play') {
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="progressPercent"></div>
+        </div>
+        <div class="progress-label">{{ i18n.t('game.progress') }}: {{ progressPercent }}%</div>
       </div>
-      <div class="progress-label">{{ i18n.t('game.progress') }}: {{ progressPercent }}%</div>
-    </div>
-  }
+    }
 
-  @if (stage === 'select') {
-    <section class="select">
-      <div class="select-card">
-        <div class="select-title">{{ i18n.t('game.chooseCategory') }}</div>
-        <div class="choice-grid">
-          @for (category of categories; track category) {
-            <button
-              class="choice-card"
-              (click)="selectCategory(category.id)"
-              >
-              <div class="choice-emoji">{{ category.emoji }}</div>
-              <div class="choice-text">{{ i18n.t(category.labelKey) }}</div>
-            </button>
-          }
+    @if (stage === 'select') {
+      <section class="select">
+        <div class="select-card">
+          <div class="select-title">{{ i18n.t('game.chooseCategory') }}</div>
+          <div class="choice-grid">
+            @for (category of categories; track category) {
+              <button
+                class="choice-card"
+                (click)="selectCategory(category.id)"
+                >
+                <div class="choice-emoji">{{ category.emoji }}</div>
+                <div class="choice-text">{{ i18n.t(category.labelKey) }}</div>
+              </button>
+            }
+          </div>
         </div>
-      </div>
-      <div class="select-card">
-        <div class="select-title">{{ i18n.t('settings.matchSize') }}</div>
-        <div class="choice-grid">
-          @for (size of matchSizes; track size) {
-            <button
-              class="choice-card small"
-              [class.active]="selectedMatchSize === size"
-              (click)="setMatchSize(size)"
-              >
-              <div class="choice-text">{{ i18n.t('settings.matchCount', { count: size }) }}</div>
-            </button>
-          }
+        <div class="select-card">
+          <div class="select-title">{{ i18n.t('settings.matchSize') }}</div>
+          <div class="choice-grid">
+            @for (size of matchSizes; track size) {
+              <button
+                class="choice-card small"
+                [class.active]="selectedMatchSize === size"
+                (click)="setMatchSize(size)"
+                >
+                <div class="choice-text">{{ i18n.t('settings.matchCount', { count: size }) }}</div>
+              </button>
+            }
+          </div>
         </div>
-      </div>
-      <div class="select-card">
-        <div class="select-title">{{ i18n.t('settings.grid') }}</div>
-        <div class="choice-grid">
-          @for (option of gridOptions; track option) {
-            <button
-              class="choice-card small"
-              [class.active]="selectedGridId === option.id"
-              (click)="setGrid(option.id)"
-              >
-              <div class="choice-text">{{ option.label }}</div>
-            </button>
-          }
+        <div class="select-card">
+          <div class="select-title">{{ i18n.t('settings.grid') }}</div>
+          <div class="choice-grid">
+            @for (option of gridOptions; track option) {
+              <button
+                class="choice-card small"
+                [class.active]="selectedGridId === option.id"
+                (click)="setGrid(option.id)"
+                >
+                <div class="choice-text">{{ option.label }}</div>
+              </button>
+            }
+          </div>
         </div>
-      </div>
-    </section>
-  }
+      </section>
+    }
 
-  @if (stage === 'play') {
-    <section class="game">
-      <div class="board-wrapper">
-        <div
-          class="board"
-          [style.gridTemplateColumns]="gridTemplate"
-          [style.--cols]="currentOption.cols"
-          [style.--rows]="currentOption.rows"
-          >
-          @for (card of cards; track trackCard($index, card)) {
-            <app-card
-              [card]="card"
-              [backImageUrl]="backCardUrl"
-              [disabled]="lockBoard"
-              (reveal)="reveal($event)"
-            ></app-card>
-          }
+    @if (stage === 'play') {
+      <section class="game">
+        <div class="board-wrapper">
+          <div
+            class="board"
+            [style.gridTemplateColumns]="gridTemplate"
+            [style.--cols]="currentOption.cols"
+            [style.--rows]="currentOption.rows"
+            >
+            @for (card of cards; track trackCard($index, card)) {
+              <app-card
+                [card]="card"
+                [backImageUrl]="backCardUrl"
+                [disabled]="lockBoard"
+                (reveal)="reveal($event)"
+              ></app-card>
+            }
+          </div>
         </div>
-      </div>
-    </section>
-  }
+      </section>
+    }
+  </main>
+
+  <footer class="bottom-footer" aria-hidden="true"></footer>
+  <div class="ad-container" aria-hidden="true"></div>
 
   @if (isWin) {
     <div class="win-overlay">
