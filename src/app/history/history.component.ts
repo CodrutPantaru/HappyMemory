@@ -53,4 +53,11 @@ export class HistoryComponent implements OnInit {
       minute: '2-digit'
     }).format(new Date(entry.playedAt));
   }
+
+  formatDuration(seconds: number): string {
+    const safe = Math.max(0, Math.floor(seconds));
+    const minutes = Math.floor(safe / 60);
+    const rem = safe % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(rem).padStart(2, '0')}`;
+  }
 }

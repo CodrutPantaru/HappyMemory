@@ -57,6 +57,18 @@
   align-items: center;
 }
 
+.header-time {
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1f1b16;
+  font-weight: 800;
+  font-size: clamp(0.74rem, 1.8vw, 0.88rem);
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 8px 16px rgba(18, 12, 8, 0.12);
+}
+
 .nav-icon.is-off {
   opacity: 0.6;
   box-shadow: 0 6px 12px rgba(18, 12, 8, 0.12);
@@ -135,6 +147,7 @@ button.ghost:active,
   display: grid;
   gap: clamp(0.7rem, 2vh, 1.5rem);
   min-height: 0;
+  height: 100%;
 }
 
 .page-content {
@@ -148,7 +161,7 @@ button.ghost:active,
 .page-content.is-play {
   overflow: hidden;
   height: 100%;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   align-content: stretch;
 }
 
@@ -246,37 +259,6 @@ button.ghost:active,
 .choice-card:disabled {
   cursor: not-allowed;
   opacity: 0.9;
-}
-
-.progress-wrap {
-  width: min(880px, 100%);
-  justify-self: center;
-  display: grid;
-  gap: 0.5rem;
-}
-
-.progress-track {
-  height: clamp(0.65rem, 1.5vh, 0.9rem);
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 999px;
-  overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 0 10px 20px rgba(18, 12, 8, 0.12);
-}
-
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #6ee44f 0%, #3fcf8e 50%, #35b9ff 100%);
-  border-radius: inherit;
-  transition: width 0.25s ease;
-}
-
-.progress-label {
-  text-align: center;
-  font-weight: 700;
-  color: #2f3b2b;
-  font-size: clamp(0.8rem, 2vw, 0.95rem);
 }
 
 .board {
@@ -388,6 +370,17 @@ button.ghost:active,
   box-shadow: 0 24px 40px rgba(18, 12, 8, 0.2);
 }
 
+.win-actions {
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.win-actions .ghost,
+.win-actions .primary {
+  width: 100%;
+}
+
 .win-title {
   font-size: clamp(1.35rem, 4.6vw, 2rem);
   font-weight: 700;
@@ -415,6 +408,11 @@ button.ghost:active,
   .nav-actions .nav-icon {
     width: 2.6rem;
     height: 2.6rem;
+  }
+
+  .header-time {
+    font-size: 0.76rem;
+    padding: 0.28rem 0.5rem;
   }
 
   .board {

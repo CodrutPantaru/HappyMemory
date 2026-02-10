@@ -1,6 +1,18 @@
 ﻿import { Injectable } from '@angular/core';
 
-type CardSoundKey = 'cat' | 'chicken' | 'cow' | 'dog' | 'elephant' | 'monkey' | 'pig' | 'rabbit' | 'frog' ;
+type CardSoundKey =
+  | 'cat'
+  | 'chicken'
+  | 'cow'
+  | 'dog'
+  | 'elephant'
+  | 'monkey'
+  | 'pig'
+  | 'rabbit'
+  | 'frog'
+  | 'horse'
+  | 'tiger'
+  | 'lion';
 
 type EffectKey = 'button' | 'flip' | 'victory';
 
@@ -27,7 +39,10 @@ export class AudioService {
     monkey: 'assets/sounds/animals/monkey.ogg',
     pig: 'assets/sounds/animals/pig.ogg',
     rabbit: 'assets/sounds/animals/rabbit.ogg',
-    frog: 'assets/sounds/animals/frog.ogg'
+    frog: 'assets/sounds/animals/frog.ogg',
+    horse: 'assets/sounds/animals/horse.ogg',
+    tiger: 'assets/sounds/animals/tiger.ogg',
+    lion: 'assets/sounds/animals/lion.ogg'
   };
 
   private readonly effectMap: Record<EffectKey, string> = {

@@ -11,6 +11,7 @@ export interface GameHistoryEntry {
   matchSize: MatchSize;
   gridId: string;
   moves: number;
+  durationSeconds: number;
   totalMatches: number;
   score: number;
 }
@@ -24,11 +25,14 @@ interface GameHistoryStore {
   recentGames: GameHistoryEntry[];
 }
 
+type StoredHistoryEntry = Omit<GameHistoryEntry, 'durationSeconds'> & { durationSeconds?: number };
+
 export interface RecordGameInput {
   categories: CategoryId[];
   matchSize: MatchSize;
   gridId: string;
   moves: number;
+  durationSeconds: number;
   totalMatches: number;
 }
 
@@ -47,7 +51,12 @@ export class GameHistoryService {
   }
 
   recordGame(input: RecordGameInput): void {
-    if (input.moves <= 0 || input.totalMatches <= 0 || input.categories.length === 0) {
+    if (
+      input.moves <= 0 ||
+      input.totalMatches <= 0 ||
+      input.durationSeconds < 0 ||
+      input.categories.length === 0
+    ) {
       return;
     }
 
@@ -58,8 +67,9 @@ export class GameHistoryService {
       matchSize: input.matchSize,
       gridId: input.gridId,
       moves: input.moves,
+      durationSeconds: Math.max(0, Math.floor(input.durationSeconds)),
       totalMatches: input.totalMatches,
-      score: this.computeScore(input.moves, input.totalMatches)
+      score: this.computeScore(input.moves, input.totalMatches, input.durationSeconds, input.matchSize)
     };
 
     const store = this.readStore();
@@ -67,11 +77,20 @@ export class GameHistoryService {
     this.writeStore(store);
   }
 
-  private computeScore(moves: number, totalMatches: number): number {
+  private computeScore(
+    moves: number,
+    totalMatches: number,
+    durationSeconds: number,
+    matchSize: MatchSize
+  ): number {
     const perfectMoves = totalMatches;
     const efficiency = perfectMoves / moves;
+    const safeDuration = Math.max(1, Math.floor(durationSeconds));
+    const parTimeSeconds = totalMatches * matchSize * 2;
+    const speed = parTimeSeconds / safeDuration;
+    const speedFactor = Math.min(1.5, Math.max(0.35, speed));
     const base = totalMatches * 100;
-    return Math.max(100, Math.round(base * efficiency));
+    return Math.max(100, Math.round(base * efficiency * speedFactor));
   }
 
   private readStore(): GameHistoryStore {
@@ -81,25 +100,19 @@ export class GameHistoryService {
         return { recentGames: [] };
       }
 
-      const parsed = JSON.parse(raw) as Partial<GameHistoryStore>;
+      const parsed = JSON.parse(raw) as { recentGames?: unknown };
       if (!Array.isArray(parsed.recentGames)) {
         return { recentGames: [] };
       }
 
       return {
-        recentGames: parsed.recentGames.filter((item): item is GameHistoryEntry => {
-          return (
-            Boolean(item) &&
-            typeof item.id === 'string' &&
-            typeof item.playedAt === 'number' &&
-            Array.isArray(item.categories) &&
-            (item.matchSize === 2 || item.matchSize === 3 || item.matchSize === 4) &&
-            typeof item.gridId === 'string' &&
-            typeof item.moves === 'number' &&
-            typeof item.totalMatches === 'number' &&
-            typeof item.score === 'number'
-          );
-        })
+        recentGames: parsed.recentGames
+          .filter((item): item is StoredHistoryEntry => this.isStoredHistoryEntry(item))
+          .map((item) => ({
+            ...item,
+            durationSeconds:
+              typeof item.durationSeconds === 'number' ? Math.max(0, Math.floor(item.durationSeconds)) : 0
+          }))
       };
     } catch {
       return { recentGames: [] };
@@ -116,5 +129,24 @@ export class GameHistoryService {
 
   private createId(): string {
     return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  private isStoredHistoryEntry(item: unknown): item is StoredHistoryEntry {
+    if (!item || typeof item !== 'object') {
+      return false;
+    }
+
+    const entry = item as Partial<StoredHistoryEntry>;
+    return (
+      typeof entry.id === 'string' &&
+      typeof entry.playedAt === 'number' &&
+      Array.isArray(entry.categories) &&
+      (entry.matchSize === 2 || entry.matchSize === 3 || entry.matchSize === 4) &&
+      typeof entry.gridId === 'string' &&
+      typeof entry.moves === 'number' &&
+      typeof entry.totalMatches === 'number' &&
+      typeof entry.score === 'number' &&
+      (entry.durationSeconds === undefined || typeof entry.durationSeconds === 'number')
+    );
   }
 }

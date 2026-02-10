@@ -1,6 +1,6 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { CardComponent } from './card.component';
 import {
   Card,
@@ -11,6 +11,8 @@ import {
   GridOption,
   buildGridOptions,
   defaultGridIdForSize,
+  normalizeGridIdForSize,
+  resolveBoardDimensions,
   MATCH_SIZES
 } from './models';
 import { I18nService } from '../i18n/i18n.service';
@@ -35,7 +37,7 @@ interface ConfettiPiece {
     templateUrl: './game.component.html',
     styleUrl: './game.component.scss'
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
   title = 'Memory Game';
 
   readonly matchSizes = MATCH_SIZES;
@@ -57,12 +59,15 @@ export class GameComponent implements OnInit {
       { value: 'pig', display: 'Purcel', imageUrl: 'assets/cards/animals/pig.webp' },
       { value: 'elephant', display: 'Elefant', imageUrl: 'assets/cards/animals/elephant.webp' },
       { value: 'monkey', display: 'Maimuta', imageUrl: 'assets/cards/animals/monkey.webp' },
-      { value: 'frog', display: 'Broasca', imageUrl: 'assets/cards/animals/frog.webp' }
+      { value: 'frog', display: 'Broasca', imageUrl: 'assets/cards/animals/frog.webp' },
+      { value: 'horse', display: 'Cal', imageUrl: 'assets/cards/animals/horse.webp' },
+      { value: 'tiger', display: 'Tigru', imageUrl: 'assets/cards/animals/tiger.webp' },
+      { value: 'lion', display: 'Leu', imageUrl: 'assets/cards/animals/lion.webp' }
     ],
-    letters: Array.from('ABCDEFGH').map((letter) => ({
+    letters: Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index)).map((letter) => ({
       value: letter,
       display: letter,
-      imageUrl: `assets/cards/letters/${letter}.webp`
+      imageUrl: `assets/cards/letters/${letter <= 'H' ? letter : letter.toLowerCase()}.webp`
     })),
     numbers: Array.from({ length: 10 }, (_, index) => {
       const value = String(index);
@@ -107,11 +112,17 @@ export class GameComponent implements OnInit {
   totalMatches = 0;
   isWin = false;
   confettiPieces: ConfettiPiece[] = [];
+  elapsedSeconds = 0;
+  viewportWidth?: number;
+  viewportHeight?: number;
 
   private flipBackTimeout?: ReturnType<typeof setTimeout>;
+  private timerInterval?: ReturnType<typeof setInterval>;
+  private gameStartedAt = 0;
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     public readonly i18n: I18nService,
     private readonly audio: AudioService,
     private readonly purchases: PurchaseService,
@@ -119,10 +130,12 @@ export class GameComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.updateViewportSize();
     void this.purchases.init();
     const categoryParam = this.route.snapshot.queryParamMap.get('category');
     const categoriesParam = this.route.snapshot.queryParamMap.get('categories');
     const sizeParam = this.route.snapshot.queryParamMap.get('size');
+    const cardsParam = this.route.snapshot.queryParamMap.get('cards');
     const rowsParam = this.route.snapshot.queryParamMap.get('rows');
     const colsParam = this.route.snapshot.queryParamMap.get('cols');
     const soundParam = this.route.snapshot.queryParamMap.get('sound');
@@ -174,24 +187,31 @@ export class GameComponent implements OnInit {
       this.selectedGridId = defaultGridIdForSize(this.selectedMatchSize);
     }
 
+    const cards = cardsParam ? Number(cardsParam) : null;
+    if (cards && Number.isInteger(cards)) {
+      this.selectedGridId = String(cards);
+    }
+
     const rows = rowsParam ? Number(rowsParam) : null;
     const cols = colsParam ? Number(colsParam) : null;
     if (rows && cols && Number.isInteger(rows) && Number.isInteger(cols)) {
-      this.selectedGridId = `${rows}x${cols}`;
+      this.selectedGridId = String(rows * cols);
     }
 
-    if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
-      this.selectedGridId = defaultGridIdForSize(this.selectedMatchSize);
-      if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
-        this.selectedGridId = this.gridOptions[0]?.id ?? this.selectedGridId;
-      }
-    }
+    this.selectedGridId = normalizeGridIdForSize(this.selectedMatchSize, this.selectedGridId);
 
     this.loadAudioSettings();
 
-    if (categoryParam || categoriesParam || sizeParam || (rows && cols)) {
+    if (categoryParam || categoriesParam || sizeParam || cards || (rows && cols)) {
       this.startGame();
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.flipBackTimeout) {
+      clearTimeout(this.flipBackTimeout);
+    }
+    this.stopTimer();
   }
 
   get gridOptions(): GridOption[] {
@@ -204,10 +224,12 @@ export class GameComponent implements OnInit {
 
   get currentOption(): MatchOption {
     const grid = this.currentGrid;
+    const { rows, cols } = resolveBoardDimensions(grid.cards, this.viewportWidth, this.viewportHeight);
     return {
       size: this.selectedMatchSize,
-      rows: grid.rows,
-      cols: grid.cols,
+      cards: grid.cards,
+      rows,
+      cols,
       label: grid.label
     };
   }
@@ -259,12 +281,16 @@ export class GameComponent implements OnInit {
   setMatchSize(size: MatchSize): void {
     this.selectedMatchSize = size;
     this.audio.playButton();
-    if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
-      this.selectedGridId = defaultGridIdForSize(size);
-      if (!this.gridOptions.some((option) => option.id === this.selectedGridId)) {
-        this.selectedGridId = this.gridOptions[0]?.id ?? this.selectedGridId;
-      }
-    }
+    this.selectedGridId = normalizeGridIdForSize(size, this.selectedGridId);
+  }
+
+  get formattedElapsed(): string {
+    const total = this.elapsedSeconds;
+    const minutes = Math.floor(total / 60);
+    const seconds = total % 60;
+    const mm = String(minutes).padStart(2, '0');
+    const ss = String(seconds).padStart(2, '0');
+    return `${mm}:${ss}`;
   }
 
   setGrid(id: string): void {
@@ -275,6 +301,17 @@ export class GameComponent implements OnInit {
   playAgain(): void {
     this.audio.playButton();
     this.startGame();
+  }
+
+  closeWinModal(): void {
+    this.audio.playButton();
+    this.isWin = false;
+    this.confettiPieces = [];
+  }
+
+  goHomeFromWin(): void {
+    this.audio.playButton();
+    void this.router.navigate(['/']);
   }
 
   onBack(): void {
@@ -304,8 +341,7 @@ export class GameComponent implements OnInit {
     }
 
     this.stage = 'play';
-    const { rows, cols, size } = this.currentOption;
-    const totalCards = rows * cols;
+    const { cards: totalCards, size } = this.currentOption;
     const uniqueNeeded = totalCards / size;
 
     if (!Number.isInteger(uniqueNeeded)) {
@@ -341,6 +377,8 @@ export class GameComponent implements OnInit {
     this.totalMatches = uniqueNeeded;
     this.isWin = false;
     this.confettiPieces = [];
+    this.elapsedSeconds = 0;
+    this.startTimer();
   }
 
   resetGame(): void {
@@ -390,11 +428,13 @@ export class GameComponent implements OnInit {
       this.audio.playMatchSound(first.value);
       this.isWin = this.matchesFound === this.totalMatches;
       if (this.isWin) {
+        this.stopTimer();
         this.history.recordGame({
           categories: this.selectedCategories,
           matchSize: this.selectedMatchSize,
           gridId: this.currentGrid.id,
           moves: this.moves,
+          durationSeconds: this.elapsedSeconds,
           totalMatches: this.totalMatches
         });
         this.confettiPieces = this.createConfetti();
@@ -491,4 +531,40 @@ export class GameComponent implements OnInit {
       // ignore
     }
   }
+  @HostListener('window:resize')
+  @HostListener('window:orientationchange')
+  onViewportChange(): void {
+    this.updateViewportSize();
+  }
+
+  private updateViewportSize(): void {
+    if (typeof window === 'undefined') {
+      this.viewportWidth = undefined;
+      this.viewportHeight = undefined;
+      return;
+    }
+
+    this.viewportWidth = window.innerWidth;
+    this.viewportHeight = window.innerHeight;
+  }
+
+  private startTimer(): void {
+    this.stopTimer();
+    this.gameStartedAt = Date.now();
+    this.timerInterval = setInterval(() => {
+      this.elapsedSeconds = Math.floor((Date.now() - this.gameStartedAt) / 1000);
+    }, 250);
+  }
+
+  private stopTimer(): void {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = undefined;
+    }
+    if (this.gameStartedAt > 0) {
+      this.elapsedSeconds = Math.floor((Date.now() - this.gameStartedAt) / 1000);
+      this.gameStartedAt = 0;
+    }
+  }
 }
+

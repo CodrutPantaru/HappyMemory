@@ -29,6 +29,7 @@
             <div class="stats">
               <div>{{ i18n.t('home.historyScore') }}: {{ entry.score }}</div>
               <div>{{ i18n.t('home.historyMoves') }}: {{ entry.moves }}</div>
+              <div>{{ i18n.t('home.historyTime') }}: {{ formatDuration(entry.durationSeconds) }}</div>
             </div>
           </article>
         }

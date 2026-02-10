@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { Card } from './models';
 
@@ -38,15 +38,11 @@ import { Card } from './models';
     `,
     styleUrl: './card.component.scss'
 })
-export class CardComponent implements OnInit{
+export class CardComponent{
   @Input({ required: true }) card!: Card;
   @Input({ required: true }) backImageUrl!: string;
   @Input() disabled = false;
   @Output() reveal = new EventEmitter<Card>();
-
-  ngOnInit(): void {
-    console.log(`${this.card.spriteIndex} CardComponent initialized with card:`, this.card);
-  }
 
   handleClick(): void {
     if (this.card) {

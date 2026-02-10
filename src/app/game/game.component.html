@@ -10,6 +10,9 @@
     </a>
     <div class="nav-title">{{ selectedCategoryLabel || i18n.t('game.chooseCategory') }}</div>
     <div class="nav-actions">
+      @if (stage === 'play') {
+        <div class="header-time">{{ i18n.t('game.time') }}: {{ formattedElapsed }}</div>
+      }
       <button
         class="nav-icon"
         type="button"
@@ -34,15 +37,6 @@
   </header>
 
   <main class="page-content" [class.is-play]="stage === 'play'">
-    @if (stage === 'play') {
-      <div class="progress-wrap">
-        <div class="progress-track">
-          <div class="progress-fill" [style.width.%]="progressPercent"></div>
-        </div>
-        <div class="progress-label">{{ i18n.t('game.progress') }}: {{ progressPercent }}%</div>
-      </div>
-    }
-
   @if (stage === 'select') {
     <section class="select">
       <div class="select-card">
@@ -140,7 +134,12 @@
       <div class="win-card">
         <div class="win-title">{{ i18n.t('game.winTitle') }} 🎉</div>
         <p>{{ i18n.t('game.winText', { moves }) }}</p>
-        <button class="primary" (click)="playAgain()">{{ i18n.t('game.playAgain') }}</button>
+        <p>{{ i18n.t('game.time') }}: {{ formattedElapsed }}</p>
+        <div class="win-actions">
+          <button class="ghost" type="button" (click)="goHomeFromWin()">{{ i18n.t('game.back') }}</button>
+          <button class="ghost" type="button" (click)="playAgain()">{{ i18n.t('game.playAgain') }}</button>
+          <button class="primary" type="button" (click)="closeWinModal()">{{ i18n.t('game.thanks') }}</button>
+        </div>
       </div>
     </div>
   }

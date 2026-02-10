@@ -4,7 +4,8 @@ import { AudioService } from '../audio/audio.service';
 import {
   CategoryId,
   MatchSize,
-  defaultGridIdForSize
+  defaultGridIdForSize,
+  normalizeGridIdForSize
 } from '../game/models';
 import { I18nService } from '../i18n/i18n.service';
 import { PREMIUM_CATEGORY_BY_ID, ProductId } from '../monetization/pack-catalog';
@@ -71,6 +72,7 @@ export class PackConfigComponent implements OnInit {
 
     const unlocked = this.selectedCategories.filter((category) => this.isCategoryUnlocked(category));
     this.selectedCategories = unlocked.length ? unlocked : [this.purchases.getFallbackCategory()];
+    this.selectedGridId = normalizeGridIdForSize(this.selectedMatchSize, this.selectedGridId);
     this.selectionMode = this.selectedCategories.length > 1 ? 'mixed' : 'single';
   }
 

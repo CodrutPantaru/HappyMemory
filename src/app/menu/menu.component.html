@@ -1,75 +1,68 @@
 <div class="menu-shell">
-  <header class="top-header">
-    <div class="profile">
-      <div class="avatar-button" aria-hidden="true">
-        <span class="avatar-emoji">🙂</span>
-      </div>
-      <div class="welcome">
-        <div class="hello">{{ i18n.t('home.hello') }}</div>
-        <div class="subtitle">{{ i18n.t('home.welcome') }}</div>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button
-        class="icon-button"
-        aria-label="Sunet"
-        [class.is-off]="!soundOn"
-        [attr.aria-pressed]="soundOn"
-        (click)="toggleSound()"
-      >
-        <span class="icon">🔊</span>
-      </button>
-      <button
-        class="icon-button"
-        aria-label="Muzica"
-        [class.is-off]="!musicOn"
-        [attr.aria-pressed]="musicOn"
-        (click)="toggleMusic()"
-      >
-        <span class="icon">🎵</span>
-      </button>
-    </div>
-  </header>
-
   <main class="page-content">
     <img class="logo-float" src="assets/logo.webp" alt="{{ i18n.t('app.title') }}" />
 
-<div class="home-content">
-    <section class="action-card">
-      <button class="primary jumbo full" type="button" (click)="startGame()" aria-label="Start joc">
-        {{ i18n.t('home.start') }}
-      </button>
-      <button class="active-pack" type="button" (click)="goToPackConfig()" aria-label="Pachet activ">
-        <div class="active-pack-label">{{ i18n.t('home.activePack') }}</div>
-        <div class="active-pack-content">
-          <img class="active-pack-image" [src]="activeCategory.imageUrl" [alt]="i18n.t(activeCategory.labelKey)" />
-          <div class="active-pack-meta">
-            <div class="active-pack-name">{{ activePacksLabel }}</div>
-            <div class="active-pack-difficulty">
-              {{ i18n.t('settings.difficulty') }}: {{ difficultyLabel }}
+    <div class="home-content">
+      <section class="action-card">
+        <button class="primary jumbo full" type="button" (click)="startGame()" aria-label="Start joc">
+          {{ i18n.t('home.start') }}
+        </button>
+
+        <button class="active-pack" type="button" (click)="goToPackConfig()" aria-label="Pachet activ">
+          <div class="active-pack-label">{{ i18n.t('home.activePack') }}</div>
+          <div class="active-pack-content">
+            <img class="active-pack-image" [src]="activeCategory.imageUrl" [alt]="i18n.t(activeCategory.labelKey)" />
+            <div class="active-pack-meta">
+              <div class="active-pack-name">{{ activePacksLabel }}</div>
+              <div class="active-pack-difficulty">
+                {{ i18n.t('settings.difficulty') }}: {{ difficultyLabel }}
+              </div>
             </div>
           </div>
+        </button>
+
+        <div class="settings-spacer"></div>
+
+        <button class="secondary settings-btn" type="button" (click)="openDifficultyModal()" aria-label="Dificultate">
+          <span class="icon">&#127919;</span>
+          {{ i18n.t('settings.difficulty') }}
+        </button>
+
+        <button class="secondary history-btn" type="button" (click)="goToHistory()" aria-label="Istoric">
+          <span class="icon">&#128202;</span>
+          {{ i18n.t('home.history') }}
+        </button>
+
+        <div class="bottom-controls">
+          <button
+            class="icon-button compact"
+            aria-label="Sunet"
+            [class.is-off]="!soundOn"
+            [attr.aria-pressed]="soundOn"
+            (click)="toggleSound()"
+          >
+            <span class="icon">&#128266;</span>
+          </button>
+          <button
+            class="icon-button compact"
+            aria-label="Muzica"
+            [class.is-off]="!musicOn"
+            [attr.aria-pressed]="musicOn"
+            (click)="toggleMusic()"
+          >
+            <span class="icon">&#127925;</span>
+          </button>
+          <button
+            class="language-flag"
+            type="button"
+            (click)="openLanguageModal()"
+            [attr.aria-label]="i18n.t('home.language')"
+          >
+            {{ currentLanguageFlag }}
+          </button>
         </div>
-      </button>
-      <div class="settings-spacer"></div>
-      <button class="secondary settings-btn" type="button" (click)="openDifficultyModal()" aria-label="Dificultate">
-        <span class="icon">🎯</span>
-        {{ i18n.t('settings.difficulty') }}
-      </button>
-      <button class="secondary history-btn" type="button" (click)="goToHistory()" aria-label="Istoric">
-        <span class="icon">📊</span>
-        {{ i18n.t('home.history') }}
-      </button>
-      <button
-        class="language-flag"
-        type="button"
-        (click)="openLanguageModal()"
-        [attr.aria-label]="i18n.t('home.language')"
-      >
-        {{ currentLanguageFlag }}
-      </button>
-    </section>
-  </div>
+      </section>
+    </div>
   </main>
 
   <footer class="bottom-footer" aria-hidden="true"></footer>
@@ -146,4 +139,3 @@
     </button>
   </div>
 }
-

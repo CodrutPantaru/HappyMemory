@@ -1,7 +1,14 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AudioService } from '../audio/audio.service';
-import { CategoryId, MatchSize, GridOption, buildGridOptions, defaultGridIdForSize } from '../game/models';
+import {
+  CategoryId,
+  MatchSize,
+  GridOption,
+  buildGridOptions,
+  defaultGridIdForSize,
+  normalizeGridIdForSize
+} from '../game/models';
 import { I18nService, LanguageCode } from '../i18n/i18n.service';
 import { PurchaseService } from '../monetization/purchase.service';
 
@@ -76,10 +83,7 @@ export class MenuComponent implements OnInit {
     const unlocked = this.selectedCategories.filter((category) => this.purchases.isCategoryUnlocked(category));
     this.selectedCategories = unlocked.length ? unlocked : [this.purchases.getFallbackCategory()];
 
-    const validGrids = buildGridOptions(this.selectedMatchSize).map((option) => option.id);
-    if (!validGrids.includes(this.selectedGridId)) {
-      this.selectedGridId = defaultGridIdForSize(this.selectedMatchSize);
-    }
+    this.selectedGridId = normalizeGridIdForSize(this.selectedMatchSize, this.selectedGridId);
 
     this.persistSettings();
   }
@@ -139,8 +143,7 @@ export class MenuComponent implements OnInit {
         category: categories[0],
         categories: categories.join(','),
         size: this.selectedMatchSize,
-        rows: this.currentGrid.rows,
-        cols: this.currentGrid.cols,
+        cards: this.currentGrid.cards,
         sound: this.soundOn,
         music: this.musicOn
       }
@@ -170,7 +173,7 @@ export class MenuComponent implements OnInit {
   setMatchSize(size: MatchSize): void {
     this.audio.playButton();
     this.selectedMatchSize = size;
-    this.selectedGridId = defaultGridIdForSize(size);
+    this.selectedGridId = normalizeGridIdForSize(size, this.selectedGridId);
     this.persistSettings();
   }
 
@@ -208,7 +211,11 @@ export class MenuComponent implements OnInit {
 
   private get currentGrid(): GridOption {
     const grids = buildGridOptions(this.selectedMatchSize);
-    return grids.find((item) => item.id === this.selectedGridId) ?? grids[0];
+    return grids.find((item) => item.id === this.selectedGridId) ?? grids[0] ?? {
+      id: defaultGridIdForSize(this.selectedMatchSize),
+      cards: Number(defaultGridIdForSize(this.selectedMatchSize)),
+      label: defaultGridIdForSize(this.selectedMatchSize)
+    };
   }
 
   get currentLanguageFlag(): string {
