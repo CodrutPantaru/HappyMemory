@@ -71,45 +71,30 @@ export const resolveBoardDimensions = (
     (viewportHeight as number) > 0;
 
   const targetRatio = hasViewport ? (viewportWidth as number) / (viewportHeight as number) : 1;
-  const preferWide = hasViewport ? (viewportWidth as number) >= (viewportHeight as number) : undefined;
 
   let bestRows = 1;
   let bestCols = totalCards;
-  let bestScore = Number.POSITIVE_INFINITY;
   let bestSquareDelta = Number.POSITIVE_INFINITY;
+  let bestRatioDelta = Number.POSITIVE_INFINITY;
 
   for (let rows = 1; rows <= Math.sqrt(totalCards); rows += 1) {
     if (totalCards % rows !== 0) {
       continue;
     }
 
+    // rows <= sqrt(totalCards) guarantees a horizontal-first layout (cols >= rows).
     const cols = totalCards / rows;
-    const candidates: Array<{ rows: number; cols: number }> = [
-      { rows, cols },
-      { rows: cols, cols: rows }
-    ];
+    const squareDelta = cols - rows;
+    const ratioDelta = Math.abs(cols / rows - targetRatio);
 
-    for (const candidate of candidates) {
-      const ratio = candidate.cols / candidate.rows;
-      let score = Math.abs(ratio - targetRatio);
-      const squareDelta = Math.abs(candidate.cols - candidate.rows);
-
-      // Force orientation-aware layouts:
-      // - wide screens -> more columns than rows
-      // - tall screens -> more rows than columns
-      if (preferWide === true && candidate.cols < candidate.rows) {
-        score += 1000;
-      }
-      if (preferWide === false && candidate.rows < candidate.cols) {
-        score += 1000;
-      }
-
-      if (score < bestScore || (score === bestScore && squareDelta < bestSquareDelta)) {
-        bestRows = candidate.rows;
-        bestCols = candidate.cols;
-        bestScore = score;
-        bestSquareDelta = squareDelta;
-      }
+    if (
+      squareDelta < bestSquareDelta ||
+      (squareDelta === bestSquareDelta && ratioDelta < bestRatioDelta)
+    ) {
+      bestRows = rows;
+      bestCols = cols;
+      bestSquareDelta = squareDelta;
+      bestRatioDelta = ratioDelta;
     }
   }
 

@@ -266,7 +266,7 @@ button.ghost:active,
   gap: var(--gap, 0.5rem);
   --play-chrome: calc(
     var(--header-height) + var(--footer-height) + var(--ad-safe-height) +
-    env(safe-area-inset-top) + env(safe-area-inset-bottom) + 14rem
+    env(safe-area-inset-top) + env(safe-area-inset-bottom) + 8rem
   );
   width: min(
     100%,
@@ -281,7 +281,7 @@ button.ghost:active,
   min-height: 0;
   display: grid;
   place-items: center;
-  overflow: hidden;
+  overflow: auto;
   container-type: size;
 }
 
